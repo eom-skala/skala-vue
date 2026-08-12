@@ -182,3 +182,94 @@ npm run lint
 
 - 서비스 소개 문구 + 검색/즐겨찾기/상세보기 3가지 핵심 기능을 짧게 설명하는 카드형 리스트
 - `RouterLink to="/"`로 메인 대시보드로 돌아가는 링크 제공
+
+---
+
+# Pinia
+
+### 1. 전역 상태 관리(Pinia) 추가
+
+`src/stores/`에 전역 상태를 관리하는 Store를 추가했습니다.
+
+- `favorites.js`
+    - `favoriteCities`: 즐겨찾기 도시 목록
+    - `toggleFavorite(cityName)`: 즐겨찾기 추가/삭제
+    - `isFavorite(cityName)`: 즐겨찾기 포함 여부 확인
+- `config.js`
+    - `unit`: 온도 단위 상태 (`celsius` / `fahrenheit`)
+    - `setUnit(unit)`: 섭씨 또는 화씨 선택
+    - `toggleUnit()`: 현재 단위를 반대 단위로 변경
+
+메인 대시보드와 즐겨찾기 대시보드가 같은 `favoritesStore`를 사용하므로, 별표를 누른 도시가 즐겨찾기 화면에 즉시 반영됩니다.
+
+### 2. 즐겨찾기 대시보드 추가
+
+`FavoriteView.vue`와 `/favorites` 라우트를 추가했습니다.
+
+- 메인 화면에서 별표를 누른 도시만 목록으로 표시
+- 즐겨찾기 카드에서 다시 별표를 누르면 목록에서 즉시 제거
+- 카드 클릭 또는 상세보기 클릭 시 해당 도시 상세 페이지로 이동
+- 목록이 비어 있으면 홈으로 돌아가는 안내 화면 표시
+
+### 3. 온도 단위 설정 기능 추가
+
+전역 내비게이션에 `UnitToggler.vue`를 추가했습니다.
+
+- `°C` 버튼: 섭씨 표시
+- `°F` 버튼: 화씨 표시
+- 선택된 단위는 활성 스타일로 표시
+
+`WeatherCard.vue`는 전역 단위 상태를 구독하도록 변경되어, 메인·즐겨찾기 화면의 카드 온도가 함께 변환됩니다.
+
+### 4. 상세 페이지 온도 단위 연동
+
+`WeatherDetailView.vue`에도 전역 `configStore`를 연결했습니다.
+
+- 현재 온도 변환
+- 체감 온도 변환
+- 예: `28°C` → `82°F`, `30°C` → `86°F`
+
+따라서 어느 페이지에서든 내비게이션의 `°C / °F`를 바꾸면 상세 페이지에도 같은 단위가 적용됩니다.
+
+### 5. 설정 페이지 추가
+
+`SettingsView.vue`와 `/settings` 라우트를 추가했습니다.
+
+- 현재 선택된 온도 단위 확인
+- 섭씨/화씨를 설정 화면에서도 변경 가능
+- 내비게이션의 단위 토글과 같은 `configStore`를 공유
+
+### 6. 내비게이션 확장
+
+`App.vue`의 내비게이션에 아래 메뉴를 추가했습니다.
+
+- 날씨 대시보드 `/`
+- 즐겨찾기 `/favorites`
+- 설정 `/settings`
+- 서비스 소개 `/about`
+
+오른쪽에는 `UnitToggler`와 `SKALA` 브랜드를 배치했습니다.
+
+### 7. 날씨 데이터 분리
+
+`src/data/WeatherList.js`로 공통 도시 데이터를 분리했습니다.
+
+```
+export const weatherList = [
+  { id: 'city_01', name: '서울', temp: 28, status: '맑음' },
+  { id: 'city_02', name: '수원', temp: 24, status: '비' },
+  { id: 'city_03', name: '부산', temp: 26, status: '구름' },
+]
+```
+
+특히 즐겨찾기 화면은 이 공통 데이터를 기준으로, Store에 저장된 도시명만 필터링하여 표시합니다.
+
+### 8. 라우터 확장 및 예외 처리
+
+기존 라우트 외에 아래 경로가 추가되었습니다.
+
+- `/favorites` → `FavoriteView.vue`
+- `/settings` → `SettingsView.vue`
+- `/:pathMatch(.*)*` → `NotFoundView.vue`
+
+마지막 Catch-all Route는 존재하지 않는 URL 접속 시 404 페이지를 표시합니다.

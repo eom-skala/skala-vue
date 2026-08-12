@@ -1,20 +1,16 @@
 <script setup>
-/* ============================================================
-   WeatherDetailView.vue
-   - '/weather/:cityId' 동적 경로에 매핑되는 상세 페이지
-   - 도시 코드(cityId)에 해당하는 상세 기상관측 Mock Data를
-     Mount 시점(onMounted)에 조회하여 화면에 표시
-   ============================================================ */
-import { onMounted, ref } from 'vue'
+
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useConfigStore } from '../stores/config'
 
 const props = defineProps({
   cityId: { type: String, required: true },
 })
 
 const router = useRouter()
+const configStore = useConfigStore()
 
-// [본인 추가] 도시별 상세 기상관측 Mock Data (홈 화면 목록보다 더 풍부한 필드 구성)
 const mockDetailData = {
   city_01: {
     name: '서울', temp: 28, status: '맑음', feelsLike: 30,
@@ -35,13 +31,16 @@ const mockDetailData = {
 
 const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁️' }[status] ?? '🌤️')
 
-// [본인 추가] Mount 시점에 cityId로 Mock Data에서 도시 객체를 선택
 const cityDetail = ref(null)
 onMounted(() => {
   cityDetail.value = mockDetailData[props.cityId] ?? null
 })
 
 const goHome = () => router.push('/')
+
+const unitSymbol = computed(() => (configStore.unit === 'fahrenheit' ? '°F' : '°C'))
+const displayTemp = (celsius) =>
+  configStore.unit === 'fahrenheit' ? Math.round((celsius * 9) / 5 + 32) : celsius
 </script>
 
 <template>
@@ -50,9 +49,9 @@ const goHome = () => router.push('/')
       <p class="eyebrow">WEATHER DETAIL</p>
       <span class="icon">{{ statusIcon(cityDetail.status) }}</span>
       <h1>{{ cityDetail.name }}</h1>
-      <p class="temperature">{{ cityDetail.temp }}°C</p>
+      <p class="temperature">{{ displayTemp(cityDetail.temp) }}{{ unitSymbol }}</p>
       <p class="summary">
-        현재 날씨는 <strong>{{ cityDetail.status }}</strong>이며, 체감 온도는 {{ cityDetail.feelsLike }}°C입니다.
+        현재 날씨는 <strong>{{ cityDetail.status }}</strong>이며, 체감 온도는 {{ displayTemp(cityDetail.feelsLike) }}{{ unitSymbol }}입니다.
       </p>
 
       <div class="detail-grid">

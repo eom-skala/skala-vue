@@ -1,21 +1,15 @@
 <script setup>
-/* ============================================================
-   WeatherHomeView.vue
-   - '/' 경로에 매핑되는 홈 뷰. 기존 WeatherParent.vue의 상태·로직을
-     그대로 이어받아 라우트 뷰로 대체한다.
-   - [변경] 상세보기 클릭 시 window.alert() 대신
-     router.push('/weather/' + id)로 Programmatic Navigation 처리
-   ============================================================ */
 import { computed, ref, watch, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseDashboardCard from '../components/exercise/BaseDashboardCard.vue'
 import SearchBar from '../components/exercise/SearchBar.vue'
 import WeatherCard from '../components/exercise/WeatherCard.vue'
 import FeedbackPanel from '../components/practices/weather/FeedbackPanel.vue'
+import { useFavoritesStore } from '../stores/favorites'
 
 const router = useRouter()
+const favoritesStore = useFavoritesStore()
 
-/* 1. 반응형 상태 */
 const weatherList = ref([
     { id: 'city_01', name: '서울', temp: 28, status: '맑음' },
     { id: 'city_02', name: '수원', temp: 24, status: '비' },
@@ -24,11 +18,9 @@ const weatherList = ref([
 const searchQuery = ref('')
 const selectedCityInfo = ref('')
 const sortOrder = ref('name')
-const favoriteCities = ref([])
 const tempTipCity = ref('')
 const tempTip = ref('')
 
-/* 2. computed */
 const selectedCity = computed(() =>
     weatherList.value.find((city) => city.name === selectedCityInfo.value) ?? null,
 )
@@ -56,19 +48,12 @@ const averageTemp = computed(() => {
     return Math.round((total / filteredWeatherList.value.length) * 10) / 10
 })
 
-/* 함수 */
 function selectCity(city) {
     selectedCityInfo.value = city.name
 }
 
-// [변경] 상세보기 클릭 → alert 대신 상세 페이지로 라우팅
 function showDetail(city) {
     router.push(`/weather/${city.id}`)
-}
-
-function toggleFavorite(cityName) {
-    const index = favoriteCities.value.indexOf(cityName)
-    index === -1 ? favoriteCities.value.push(cityName) : favoriteCities.value.splice(index, 1)
 }
 
 function showTempTip(city) {
@@ -84,7 +69,6 @@ function showTempTip(city) {
     tempTip.value = message
 }
 
-/* 3. watch / watchEffect */
 watch(selectedCityInfo, (current, previous) =>
     console.log(`[watch] selectedCityInfo 변경: ${previous} → ${current}`),
 )
@@ -93,7 +77,7 @@ watch(sortOrder, (current, previous) =>
     console.log(`[watch] 정렬 기준 변경: ${previous} → ${current}`),
 )
 watch(
-    favoriteCities,
+    () => favoritesStore.favoriteCities,
     (cities) => console.log(`[watch] 즐겨찾기 목록 변경 (총 ${cities.length}개):`, cities),
     { deep: true },
 )
@@ -102,7 +86,6 @@ watch(
 <template>
     <main class="page" :class="pageThemeClass">
         <header class="hero">
-            <p class="skala">SKALA</p>
             <p class="eyebrow">TODAY'S WEATHER</p>
             <h1>오늘의 날씨</h1>
             <p class="hero-sub">도시를 검색하거나 카드를 눌러 살펴보세요</p>
@@ -122,13 +105,13 @@ watch(
                     </div>
                 </div>
                 <p v-if="sortedFilteredList.length" class="avg-readout">
-                    평균 기온 · <strong>{{ averageTemp }}°C</strong> · 즐겨찾기 {{ favoriteCities.length }}곳
+                    평균 기온 · <strong>{{ averageTemp }}°C</strong> · 즐겨찾기 {{ favoritesStore.favoriteCities.length }}곳
                 </p>
 
                 <TransitionGroup v-if="sortedFilteredList.length" name="card" tag="div" class="weather-grid">
                     <WeatherCard v-for="city in sortedFilteredList" :key="city.id" :city="city"
-                        :selected-city="selectedCity" :is-favorite="favoriteCities.includes(city.name)"
-                        @select-card="selectCity" @click-detail="showDetail" @toggle-favorite="toggleFavorite"
+                        :selected-city="selectedCity" :is-favorite="favoritesStore.isFavorite(city.name)"
+                        @select-card="selectCity" @click-detail="showDetail" @toggle-favorite="favoritesStore.toggleFavorite"
                         @show-temp-tip="showTempTip" />
                 </TransitionGroup>
                 <div v-else class="no-result">
@@ -178,13 +161,6 @@ watch(
     max-width: 760px;
     margin: 0 auto 36px;
     text-align: center;
-}
-
-.skala {
-    margin: 0 0 50px;
-    font: 1000 12px 'Outfit', sans-serif;
-    letter-spacing: 4px;
-    color: #000;
 }
 
 .eyebrow {

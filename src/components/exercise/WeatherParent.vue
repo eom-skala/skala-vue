@@ -3,7 +3,7 @@ import { computed, ref, watch, watchEffect } from 'vue'
 import BaseDashboardCard from './BaseDashboardCard.vue'
 import SearchBar from './SearchBar.vue'
 import WeatherCard from './WeatherCard.vue'
-import FeedbackPanel from './FeedbackPanel.vue'
+import FeedbackPanel from '../practices/weather/FeedbackPanel.vue'
 
 const weatherList = ref([
   { id: 'city_01', name: '서울', temp: 28, status: '맑음' },

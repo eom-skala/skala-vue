@@ -42,6 +42,7 @@ import SlotNamedParent from './components/practices/basic/SlotNamedParent.vue'
 import SlotScopedChild from './components/practices/basic/SlotScopedChild.vue'
 import SlotScopedParent from './components/practices/basic/SlotScopedParent.vue'
 import WeatherParent from './components/exercise/WeatherParent.vue'
+import UnitToggler from './components/exercise/UnitToggler.vue'
 
 
 // import { RouterLink, RouterView } from 'vue-router'
@@ -137,10 +138,20 @@ import WeatherParent from './components/exercise/WeatherParent.vue'
     <!-- <Practice2 /> -->
     <!-- <WeatherParent /> -->
     <header class="app-header">
-      <nav aria-label="주요 메뉴">
-        <RouterLink to="/">날씨 대시보드</RouterLink>
-        <RouterLink to="/about">서비스 소개</RouterLink>
-      </nav>
+      <div class="app-header__inner">
+        <nav aria-label="주요 메뉴">
+          <RouterLink to="/">날씨 대시보드</RouterLink>
+          <RouterLink to="/favorites">즐겨찾기</RouterLink>
+          <RouterLink to="/settings">설정</RouterLink>
+          <RouterLink to="/about">서비스 소개</RouterLink>
+        </nav>
+
+        <!-- [본인 추가] Navigation Bar 옆에 단위 설정 토글 배치, SKALA 브랜딩과 함께 우측 그룹으로 정리 -->
+        <div class="app-header__side">
+          <UnitToggler />
+          <span class="brand">SKALA</span>
+        </div>
+      </div>
     </header>
 
     <main>
@@ -150,6 +161,8 @@ import WeatherParent from './components/exercise/WeatherParent.vue'
 </template>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;900&display=swap');
+
 * {
   box-sizing: border-box;
 }
@@ -174,11 +187,25 @@ input {
   backdrop-filter: blur(10px);
 }
 
-.app-header nav {
+.app-header__inner {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 18px;
   max-width: 900px;
   margin: auto;
+}
+
+.app-header nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.app-header__side {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .app-header a {
@@ -189,6 +216,14 @@ input {
 
 .app-header a.router-link-active {
   color: #3e8ed8;
+}
+
+.app-header .brand {
+  position: relative;
+  top: 3px;
+  font: 1000 18px 'Outfit', sans-serif;
+  letter-spacing: 4px;
+  color: #000;
 }
 </style>
 

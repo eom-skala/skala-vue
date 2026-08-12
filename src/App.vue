@@ -41,7 +41,7 @@ import SlotNamedChild from './components/practices/basic/SlotNamedChild.vue'
 import SlotNamedParent from './components/practices/basic/SlotNamedParent.vue'
 import SlotScopedChild from './components/practices/basic/SlotScopedChild.vue'
 import SlotScopedParent from './components/practices/basic/SlotScopedParent.vue'
-import WeatherParent from './components/practices/weather/WeatherParent.vue'
+import WeatherParent from './components/exercise/WeatherParent.vue'
 
 
 // import { RouterLink, RouterView } from 'vue-router'
@@ -135,15 +135,68 @@ import WeatherParent from './components/practices/weather/WeatherParent.vue'
     <hr>
     <SlotScopedParent /> -->
     <!-- <Practice2 /> -->
-    <WeatherParent />
+    <!-- <WeatherParent /> -->
+    <header class="app-header">
+      <nav aria-label="주요 메뉴">
+        <RouterLink to="/">날씨 대시보드</RouterLink>
+        <RouterLink to="/about">서비스 소개</RouterLink>
+      </nav>
+    </header>
+
+    <main>
+      <RouterView />
+    </main>
   </div>
 </template>
 
-<style scoped>
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #eef2f7;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app-header {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  padding: 14px 24px;
+  background: rgb(255 255 255 / 92%);
+  border-bottom: 1px solid #dce3ed;
+  backdrop-filter: blur(10px);
+}
+
+.app-header nav {
+  display: flex;
+  gap: 18px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.app-header a {
+  color: #5b6478;
+  text-decoration: none;
+  font: 700 14px 'Noto Sans KR', sans-serif;
+}
+
+.app-header a.router-link-active {
+  color: #3e8ed8;
+}
+</style>
+
+<!-- <style scoped>
 /* hr {
   margin: 30px 0;
 } */
-</style>
+</style> -->
 
 <!-- <style scoped>
 header {

@@ -21,8 +21,4 @@
   max-width: 520px;
   margin: 0 auto 32px;
 }
-
-.weather-area {
-  width: 100%;
-}
 </style>

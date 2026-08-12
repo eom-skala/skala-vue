@@ -1,9 +1,5 @@
 <script setup>
-defineProps({
-  city: { type: Object, required: true },
-  selectedCity: { type: Object, default: null },
-  isFavorite: { type: Boolean, default: false },
-})
+defineProps({ city: { type: Object, required: true }, selectedCity: { type: Object, default: null }, isFavorite: Boolean })
 const emit = defineEmits(['select-card', 'click-detail', 'toggle-favorite', 'show-temp-tip'])
 const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁️' }[status] ?? '🌤️')
 </script>
@@ -13,15 +9,15 @@ const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁
     <div class="card-top">
       <div class="place"><span class="icon">{{ statusIcon(city.status) }}</span>
         <div>
-          <h3>{{ city.name }}</h3><span class="status-text">{{ city.status }}</span>
+          <h3>{{ city.name }}</h3><span>{{ city.status }}</span>
         </div>
       </div><button class="detail-btn" @click.stop="emit('click-detail', city)">상세보기</button>
     </div>
     <div class="temp-readout"><span class="temp-number">{{ city.temp }}</span><span class="temp-unit">°C</span></div>
     <button class="temp-status" :class="city.temp >= 25 ? 'hot' : 'cool'" @click.stop="emit('show-temp-tip', city)">{{
       city.temp >= 25 ? '🔥 더움 · 25도 이상' : '❄️ 선선함 · 25도 미만' }}</button>
-    <button class="fav-btn" :class="{ active: isFavorite }" :aria-label="`${city.name} 즐겨찾기`"
-      @click.stop="emit('toggle-favorite', city.name)">{{ isFavorite ? '★' : '☆' }}</button>
+    <button class="fav-btn" :class="{ active: isFavorite }" @click.stop="emit('toggle-favorite', city.name)">{{
+      isFavorite ? '★' : '☆' }}</button>
   </article>
 </template>
 
@@ -70,6 +66,11 @@ const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁
   font-size: 17px;
 }
 
+.place span {
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
 .status-text {
   color: var(--ink-soft);
   font-size: 12px;
@@ -106,6 +107,14 @@ const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁
   line-height: 1;
 }
 
+.temp-readout {
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  margin-bottom: 14px;
+  font-family: 'Outfit', sans-serif;
+}
+
 .temp-unit {
   margin-top: 4px;
   color: var(--ink-soft);
@@ -118,6 +127,20 @@ const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁
   padding: 6px 12px;
   font-size: 12px;
   font-weight: 700;
+}
+
+.fav-btn:hover {
+  transform: scale(1.12) rotate(-8deg);
+  color: #f2c94c;
+}
+
+.temp-status:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(28, 35, 51, 0.12);
+}
+
+.detail-btn:hover {
+  background: var(--line);
 }
 
 .hot {

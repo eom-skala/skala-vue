@@ -6,8 +6,11 @@ const emit = defineEmits(['update-query'])
 <template>
   <div class="search-city">
     <label class="field-label" for="city-search">도시 검색</label>
-    <div class="input-wrap"><span class="input-icon">⌕</span><input id="city-search" :value="query" type="text"
-        placeholder="검색할 도시 이름 입력" @input="emit('update-query', $event.target.value)" /></div>
+    <div class="input-wrap">
+      <span class="input-icon">⌕</span>
+      <input id="city-search" :value="query" type="text" placeholder="검색할 도시 이름 입력"
+        @input="emit('update-query', $event.target.value)" />
+    </div>
     <p v-if="query" class="query-readout">검색 중 · <strong>{{ query }}</strong></p>
   </div>
 </template>
@@ -27,7 +30,6 @@ const emit = defineEmits(['update-query'])
   color: var(--ink-soft);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: .5px;
 }
 
 .input-wrap {
@@ -40,22 +42,20 @@ const emit = defineEmits(['update-query'])
   position: absolute;
   left: 14px;
   color: var(--ink-soft);
-  font-size: 16px;
   pointer-events: none;
 }
 
-.input-wrap input {
+input {
   width: 100%;
   padding: 12px 14px 12px 38px;
-  outline: none;
+  outline: 0;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--bg);
   color: var(--ink);
-  font: 14px inherit;
 }
 
-.input-wrap input:focus {
+input:focus {
   border-color: var(--accent-cool);
   box-shadow: 0 0 0 3px var(--accent-cool-soft);
 }

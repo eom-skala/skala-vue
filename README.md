@@ -153,3 +153,32 @@ npm run lint
 - `tip` 값이 있으면 온도 상태 클릭으로 생성된 날씨 팁을 전환 애니메이션과 함께 표시합니다.
 
 이 컴포넌트는 표시만 담당하며, 팁 생성과 선택 상태 관리는 모두 `WeatherParent`에 있습니다.
+
+---
+
+# 라우팅
+
+**1. 라우팅 구조 도입**
+
+- `router/index.js`에 정의된 경로에 맞춰, 기존 컴포넌트 조합 방식을 그대로 페이지 단위(View)로 승격
+- `/` → `WeatherHomeView.vue`
+- `/weather/:cityId` → `WeatherDetailView.vue`
+- `/about` → `WeatherAboutView.vue`
+
+**2. WeatherHomeView.vue** (WeatherParent 대체)
+
+- 반응형 상태·computed·watch 로직은 `WeatherParent.vue`와 동일하게 유지
+- **변경점**: `showDetail(city)`에서 `window.alert(...)`를 제거하고 `useRouter()`의 `router.push(`/weather/${city.id}`)`로 교체 → "상세보기" 클릭 시 알림창 대신 상세 페이지로 실제 이동(Programmatic Navigation)
+
+**3. WeatherDetailView.vue** (신규)
+
+- `/weather/:cityId` 동적 경로의 `cityId`를 props로 수신
+- 홈 화면보다 필드가 풍부한 상세 Mock Data(체감온도, 습도, 풍속, 강수확률, 자외선지수, 일출/일몰, 업데이트 시각) 구성
+- `onMounted` 시점에 `cityId`로 Mock Data에서 해당 도시 객체를 찾아 `cityDetail` ref에 담아 표시
+- 존재하지 않는 cityId인 경우 "도시 정보를 찾을 수 없습니다" 안내 처리
+- 하단에 대시보드로 돌아가는 버튼(`router.push('/')`) 포함
+
+**4. WeatherAboutView.vue** (신규)
+
+- 서비스 소개 문구 + 검색/즐겨찾기/상세보기 3가지 핵심 기능을 짧게 설명하는 카드형 리스트
+- `RouterLink to="/"`로 메인 대시보드로 돌아가는 링크 제공

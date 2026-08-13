@@ -160,6 +160,7 @@ onMounted(() => {
           <RouterLink to="/favorites">즐겨찾기</RouterLink>
           <RouterLink to="/cities">도시 관리</RouterLink>
           <RouterLink to="/settings">설정</RouterLink>
+          <RouterLink to="/dev-notes">개발 노트</RouterLink>
           <RouterLink to="/about">서비스 소개</RouterLink>
         </nav>
 

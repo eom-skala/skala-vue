@@ -19,6 +19,8 @@ This template should help get you started developing with Vue 3 in Vite.
 
 See [Vite Configuration Reference](https://vite.dev/config/).
 
+---
+
 ## Project Setup
 
 ```sh
@@ -42,8 +44,9 @@ npm run build
 ```sh
 npm run lint
 ```
+---
 
-**1. 반응형 상태**
+## 1. 반응형 상태
 
 - `weatherList`: 도시별 날씨 데이터 배열 (id, name, temp, status)
 - `searchQuery`: 검색어
@@ -53,14 +56,14 @@ npm run lint
 - `tempTipCity`: 온도 배지를 클릭한 도시 이름
 - `tempTip`: 그 도시의 온도에 맞춰 보여줄 팁 문구
 
-**2. computed**
+## 2. computed
 
 - `filteredWeatherList`: 검색어가 없으면 전체 목록, 있으면 이름에 검색어가 포함된 도시만 필터링
 - `sortedFilteredList`: `filteredWeatherList`를 정렬 기준(이름순/온도순)에 따라 정렬
 - `averageTemp`: 필터링된 도시들의 평균 기온 계산
 - `pageThemeClass`: `selectedCityInfo`로 선택된 도시를 찾아 날씨 상태에 맞는 페이지 배경 테마 클래스(`theme-sunny`/`theme-rain`/`theme-cloud`)를 반환
 
-**3. watch / watchEffect**
+## 3. watch / watchEffect
 
 - `watch(selectedCityInfo, ...)`: 선택 도시가 바뀔 때마다 이전값 → 새값 콘솔 로그
 - `watch(sortOrder, ...)`: 정렬 기준이 바뀔 때마다 콘솔 로그
@@ -70,7 +73,7 @@ npm run lint
 - `weatherThemeClass(status)`: 날씨 상태 문자열(맑음/비/구름)을 페이지 배경 테마 클래스명으로 변환
 - `showTempTip(cityName, temp)`: 온도 구간(28↑/25~27/20~24/20↓)에 따라 4단계 팁 문구를 만들어 `tempTipCity`, `tempTip`에 저장
 
-**4. 함수(메서드)**
+## 4. 함수(메서드)
 
 - `selectCity(cityName)`: 카드를 클릭하면 `selectedCityInfo`를 해당 도시로 설정
 - `showDetail(cityName, status)`: "상세보기" 버튼 클릭 시 알림창으로 날씨 상태 표시
@@ -78,7 +81,7 @@ npm run lint
 - `toggleFavorite(cityName)`: 즐겨찾기 목록에 도시를 추가하거나 제거
 - `isFavorite(cityName)`: 해당 도시가 즐겨찾기에 포함됐는지 여부 반환
 
-**5. 템플릿 표시 로직**
+## 5. 템플릿 표시 로직
 
 - 검색어 입력 시 "검색 중 · {검색어}" 문구 표시
 - 필터링된 도시가 있을 때: 평균 기온 + 즐겨찾기 개수 표시 → 카드 그리드 렌더링(트랜지션 적용)

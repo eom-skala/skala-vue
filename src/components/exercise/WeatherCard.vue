@@ -3,18 +3,17 @@ import { computed } from 'vue'
 import { useConfigStore } from '../../stores/configStore'
 
 const props = defineProps({ city: { type: Object, required: true }, selectedCity: { type: Object, default: null }, isFavorite: Boolean })
-const emit = defineEmits(['select-card', 'click-detail', 'toggle-favorite', 'show-temp-tip'])
+const emit = defineEmits(['select-card', 'click-detail', 'toggle-favorite', 'show-temp-tip', 'show-air-tip'])
 const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁️' }[status] ?? '🌤️')
 
 const configStore = useConfigStore()
 
-// [본인 추가] configStore.unit에 따라 표시 온도를 변환
 const displayTemp = computed(() => {
-  const rawTemp = props.city.temp // 기본 원본 데이터는 섭씨 숫자
+  const rawTemp = props.city.temp
   if (configStore.unit === 'fahrenheit') {
-    return Math.round((rawTemp * 9) / 5 + 32) // 화씨 변환 연산
+    return Math.round((rawTemp * 9) / 5 + 32)
   }
-  return rawTemp // 'celsius'일 때는 원본 그대로 반환
+  return rawTemp
 })
 
 </script>
@@ -31,8 +30,8 @@ const displayTemp = computed(() => {
     <div class="temp-readout"><span class="temp-number">{{ displayTemp }}</span><span class="temp-unit">{{
       configStore.unitSymbol
         }}</span></div>
-    <span v-if="city.airQuality" class="air-badge" :class="`air-${city.airQuality.aqi}`">미세먼지 {{ city.airQuality.label
-    }}</span>
+    <button v-if="city.airQuality" class="air-badge" :class="`air-${city.airQuality.aqi}`" type="button"
+      @click.stop="emit('show-air-tip', city)">미세먼지 {{ city.airQuality.label }}</button>
     <button class="temp-status" :class="city.temp >= 25 ? 'hot' : 'cool'" @click.stop="emit('show-temp-tip', city)">{{
       city.temp >= 25 ? '🔥 더움 · 25도 이상' : '❄️ 선선함 · 25도 미만' }}</button>
     <button class="fav-btn" :class="{ active: isFavorite }" @click.stop="emit('toggle-favorite', city.name)">{{
@@ -151,8 +150,10 @@ const displayTemp = computed(() => {
 .air-badge {
   display: inline-block;
   margin-left: 6px;
+  border: 0;
   padding: 6px 10px;
   border-radius: 999px;
+  cursor: pointer;
   font-size: 12px;
   font-weight: 700;
 }
@@ -179,6 +180,7 @@ const displayTemp = computed(() => {
   color: #f2c94c;
 }
 
+.air-badge:hover,
 .temp-status:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(28, 35, 51, 0.12);

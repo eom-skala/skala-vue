@@ -74,6 +74,19 @@ function showTempTip(city) {
     tempTip.value = message
 }
 
+function showAirTip(city) {
+    const pm25 = city.airQuality?.pm25 ?? 0
+    const message = pm25 <= 15
+        ? '😊 공기가 깨끗해요. 야외 활동하기 좋은 날입니다.'
+        : pm25 <= 35
+            ? '🙂 대기질이 보통이에요. 민감한 분은 장시간 야외 활동에 유의하세요.'
+            : pm25 <= 75
+                ? '😷 미세먼지 농도가 높아요. 외출 시 마스크 착용을 권장합니다.'
+                : '🚨 미세먼지 농도가 매우 높아요. 가급적 실외 활동을 줄여 주세요.'
+    tempTipCity.value = `${city.name} · 미세먼지 ${city.airQuality.label}`
+    tempTip.value = message
+}
+
 function addCurrentLocation() {
     locationError.value = ''
     if (!navigator.geolocation) {
@@ -85,7 +98,10 @@ function addCurrentLocation() {
     navigator.geolocation.getCurrentPosition(
         async ({ coords }) => {
             try {
-                const result = await citiesStore.addCurrentLocation(coords)
+                const result = await citiesStore.addCurrentLocation({
+                    lat: coords.latitude,
+                    lon: coords.longitude,
+                })
                 if (result.ok) selectCity(result.city)
             } catch {
                 locationError.value = '내 위치 날씨를 가져오지 못했습니다.'
@@ -156,7 +172,8 @@ onMounted(() => citiesStore.fetchAllWeather())
                     <WeatherCard v-for="city in sortedFilteredList" :key="city.id" :city="city"
                         :selected-city="selectedCity" :is-favorite="favoritesStore.isFavorite(city.name)"
                         @select-card="selectCity" @click-detail="showDetail"
-                        @toggle-favorite="favoritesStore.toggleFavorite" @show-temp-tip="showTempTip" />
+                        @toggle-favorite="favoritesStore.toggleFavorite" @show-temp-tip="showTempTip"
+                        @show-air-tip="showAirTip" />
                 </TransitionGroup>
                 <div v-else class="no-result">
                     <p class="no-result-icon">🔍</p>

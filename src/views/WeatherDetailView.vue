@@ -5,6 +5,13 @@ import { useRouter } from 'vue-router'
 import { useConfigStore } from '../stores/configStore'
 import { useCitiesStore } from '../stores/cities'
 import { fetchFiveDayForecast } from '../data/weather'
+import { use } from 'echarts/core'
+import { LineChart } from 'echarts/charts'
+import { CanvasRenderer } from 'echarts/renderers'
+import { GridComponent, TooltipComponent } from 'echarts/components'
+import VChart from 'vue-echarts'
+
+use([CanvasRenderer, LineChart, GridComponent, TooltipComponent])
 
 const props = defineProps({ cityId: { type: String, required: true } })
 
@@ -50,6 +57,14 @@ const dailyForecast = computed(() => {
 
 const forecastDayLabel = (index) => ['오늘', '내일', '모레'][index] ?? ''
 
+const chartOption = computed(() => ({
+  grid: { left: 38, right: 18, top: 22, bottom: 34 },
+  xAxis: { type: 'category', data: forecast.value.slice(0, 16).map((item) => item.time), axisLine: { lineStyle: { color: '#dce3ed' } }, axisLabel: { color: '#5b6478' } },
+  yAxis: { type: 'value', axisLine: { show: false }, splitLine: { lineStyle: { color: '#eaf0f6' } }, axisLabel: { color: '#5b6478' } },
+  tooltip: { trigger: 'axis', valueFormatter: (value) => `${value}${configStore.unitSymbol}` },
+  series: [{ type: 'line', smooth: true, data: forecast.value.slice(0, 16).map((item) => displayTemp(item.temp)), symbolSize: 7, lineStyle: { color: '#3e8ed8', width: 3 }, itemStyle: { color: '#3e8ed8' }, areaStyle: { color: 'rgba(62, 142, 216, .15)' } }],
+}))
+
 async function loadForecast(city) {
   if (!city?.lat || !city?.lon) return
   isForecastLoading.value = true
@@ -89,6 +104,7 @@ const displayTemp = (celsius) =>
       <span class="icon">{{ statusIcon(cityDetail.status) }}</span>
       <h1>{{ cityDetail.name }}</h1>
       <p class="temperature">{{ displayTemp(cityDetail.temp) }}{{ configStore.unitSymbol }}</p>
+      <VChart v-if="forecast.length" class="forecast-chart" :option="chartOption" autoresize />
       <p class="summary">
         현재 날씨는 <strong>{{ cityDetail.description ?? cityDetail.status }}</strong>이며, 체감 온도는 {{
           displayTemp(cityDetail.feelsLike) }}{{ configStore.unitSymbol }}입니다.
@@ -97,44 +113,47 @@ const displayTemp = (celsius) =>
         미세먼지 {{ cityDetail.airQuality.label }} · PM2.5 {{ cityDetail.airQuality.pm25 }}㎍/㎥ · PM10 {{
           cityDetail.airQuality.pm10 }}㎍/㎥
       </p>
+      <div class="detail-forecast">
+        <div class="detail-content">
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="label">습도</span>
+              <span class="value">{{ cityDetail.humidity }}%</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">풍속</span>
+              <span class="value">{{ cityDetail.windSpeed }} m/s</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">강수량(1h)</span>
+              <span class="value">{{ cityDetail.precipitation }} mm</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">일출</span>
+              <span class="value">{{ cityDetail.sunrise }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">일몰</span>
+              <span class="value">{{ cityDetail.sunset }}</span>
+            </div>
+          </div>
 
-      <div class="detail-grid">
-        <div class="detail-item">
-          <span class="label">습도</span>
-          <span class="value">{{ cityDetail.humidity }}%</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">풍속</span>
-          <span class="value">{{ cityDetail.windSpeed }} m/s</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">강수량(1h)</span>
-          <span class="value">{{ cityDetail.precipitation }} mm</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">일출</span>
-          <span class="value">{{ cityDetail.sunrise }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">일몰</span>
-          <span class="value">{{ cityDetail.sunset }}</span>
+          <section class="forecast-section">
+            <div class="forecast-heading">
+              <h2>3일 예보</h2><span v-if="isForecastLoading">불러오는 중…</span>
+            </div>
+            <div v-if="dailyForecast.length" class="forecast-grid">
+              <article v-for="(item, index) in dailyForecast" :key="item.timestamp" class="forecast-card">
+                <strong>{{ forecastDayLabel(index) }}</strong>
+                <span>{{ item.date.slice(5).replace('-', '.') }} · {{ item.time }}</span>
+                <b>{{ displayTemp(item.temp) }}{{ configStore.unitSymbol }}</b>
+                <small>{{ item.description }}</small>
+              </article>
+            </div>
+            <p v-else-if="forecastError" class="forecast-error">{{ forecastError }}</p>
+          </section>
         </div>
       </div>
-
-      <section class="forecast-section">
-        <div class="forecast-heading">
-          <h2>3일 예보</h2><span v-if="isForecastLoading">불러오는 중…</span>
-        </div>
-        <div v-if="dailyForecast.length" class="forecast-grid">
-          <article v-for="(item, index) in dailyForecast" :key="item.timestamp" class="forecast-card">
-            <strong>{{ forecastDayLabel(index) }}</strong>
-            <span>{{ item.date.slice(5).replace('-', '.') }} · {{ item.time }}</span>
-            <b>{{ displayTemp(item.temp) }}{{ configStore.unitSymbol }}</b>
-            <small>{{ item.description }}</small>
-          </article>
-        </div>
-        <p v-else-if="forecastError" class="forecast-error">{{ forecastError }}</p>
-      </section>
 
       <p class="updated">
         최근 업데이트 · {{ cityDetail.updatedAt }}
@@ -235,6 +254,24 @@ const displayTemp = (celsius) =>
   margin: 0 auto;
 }
 
+
+
+.detail-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  gap: 10%;
+}
+
+.detail-content .detail-grid {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+}
+
 .detail-item {
   display: flex;
   flex-direction: column;
@@ -260,6 +297,14 @@ const displayTemp = (celsius) =>
   max-width: 560px;
   margin: 28px auto 0;
   text-align: left;
+  gap: 20%;
+}
+
+.detail-content .forecast-section {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
 }
 
 .forecast-heading {
@@ -303,6 +348,23 @@ const displayTemp = (celsius) =>
 
 .forecast-card b {
   font: 700 22px 'Outfit', sans-serif;
+}
+
+.forecast-chart {
+  width: 100%;
+  height: 260px;
+  margin-top: 16px;
+}
+
+@media (max-width: 720px) {
+  .detail-content {
+    flex-direction: column;
+  }
+
+  .detail-content .detail-grid,
+  .detail-content .forecast-section {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {

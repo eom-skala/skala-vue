@@ -8,12 +8,13 @@ const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁
 
 const configStore = useConfigStore()
 
+// [본인 추가] configStore.unit에 따라 표시 온도를 변환
 const displayTemp = computed(() => {
-  const rawTemp = props.city.temp
+  const rawTemp = props.city.temp // 기본 원본 데이터는 섭씨 숫자
   if (configStore.unit === 'fahrenheit') {
-    return Math.round((rawTemp * 9) / 5 + 32)
+    return Math.round((rawTemp * 9) / 5 + 32) // 화씨 변환 연산
   }
-  return rawTemp
+  return rawTemp // 'celsius'일 때는 원본 그대로 반환
 })
 
 </script>
@@ -180,7 +181,6 @@ const displayTemp = computed(() => {
   color: #f2c94c;
 }
 
-.air-badge:hover,
 .temp-status:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(28, 35, 51, 0.12);

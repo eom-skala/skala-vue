@@ -1,5 +1,8 @@
 <script setup>
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
+import { useGeolocation } from '@vueuse/core'
+import { Vue3Lottie } from 'vue3-lottie'
+import weatherSun from '../data/weather-sun.json'
 import { useRouter } from 'vue-router'
 import BaseDashboardCard from '../components/exercise/BaseDashboardCard.vue'
 import SearchBar from '../components/exercise/SearchBar.vue'
@@ -21,6 +24,7 @@ const tempTipCity = ref('')
 const tempTip = ref('')
 const isLocating = ref(false)
 const locationError = ref('')
+const { coords, error: geolocationError, resume, pause } = useGeolocation({ immediate: false, enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 })
 
 const selectedCity = computed(() =>
     weatherList.value.find((city) => city.name === selectedCityInfo.value) ?? null,
@@ -89,33 +93,30 @@ function showAirTip(city) {
 
 function addCurrentLocation() {
     locationError.value = ''
-    if (!navigator.geolocation) {
-        locationError.value = '이 브라우저는 위치 정보를 지원하지 않습니다.'
-        return
-    }
-
     isLocating.value = true
-    navigator.geolocation.getCurrentPosition(
-        async ({ coords }) => {
-            try {
-                const result = await citiesStore.addCurrentLocation({
-                    lat: coords.latitude,
-                    lon: coords.longitude,
-                })
-                if (result.ok) selectCity(result.city)
-            } catch {
-                locationError.value = '내 위치 날씨를 가져오지 못했습니다.'
-            } finally {
-                isLocating.value = false
-            }
-        },
-        () => {
-            locationError.value = '위치 정보 권한을 허용해 주세요.'
-            isLocating.value = false
-        },
-        { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
-    )
+    resume()
 }
+
+watch(() => coords.value.latitude, async (latitude) => {
+    const longitude = coords.value.longitude
+    if (!isLocating.value || !Number.isFinite(latitude) || !Number.isFinite(longitude)) return
+    pause()
+    try {
+        const result = await citiesStore.addCurrentLocation({ lat: latitude, lon: longitude })
+        if (result.ok) selectCity(result.city)
+    } catch {
+        locationError.value = '내 위치 날씨를 가져오지 못했습니다.'
+    } finally {
+        isLocating.value = false
+    }
+})
+
+watch(geolocationError, (error) => {
+    if (!error || !isLocating.value) return
+    locationError.value = error.message || '위치 정보 권한을 허용해 주세요.'
+    isLocating.value = false
+    pause()
+})
 
 watch(selectedCityInfo, (current, previous) =>
     console.log(`[watch] selectedCityInfo 변경: ${previous} → ${current}`),
@@ -136,6 +137,7 @@ onMounted(() => citiesStore.fetchAllWeather())
 <template>
     <main class="page" :class="pageThemeClass">
         <header class="hero">
+            <Vue3Lottie :animation-data="weatherSun" :height="56" :width="56" class="weather-lottie" />
             <p class="eyebrow">TODAY'S WEATHER</p>
             <h1>오늘의 날씨</h1>
             <p class="hero-sub">도시를 검색하거나 카드를 눌러 살펴보세요</p>
@@ -222,6 +224,10 @@ onMounted(() => citiesStore.fetchAllWeather())
     max-width: 760px;
     margin: 0 auto 36px;
     text-align: center;
+}
+
+.weather-lottie {
+    margin: 0 auto 6px;
 }
 
 .eyebrow {

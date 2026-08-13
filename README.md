@@ -419,3 +419,34 @@ VITE_OPENWEATHER_API_KEY=발급받은_API_키
 VITE_OPENWEATHER_API_KEY=
 ```
 
+---
+
+# 사용한 API 목록
+
+## OpenWeatherMap Geocoding API
+도시명(서울·수원·부산 등)을 위도·경도로 변환합니다.
+GET /geo/1.0/direct
+
+## OpenWeatherMap Reverse Geocoding API
+내 위치의 위도·경도를 도시 이름으로 변환합니다.
+GET /geo/1.0/reverse
+
+## OpenWeatherMap Current Weather API
+현재 온도, 체감 온도, 습도, 풍속, 강수량, 날씨 상태를 조회합니다.
+GET /data/2.5/weather
+
+## OpenWeatherMap Air Pollution API
+AQI, PM2.5, PM10 데이터를 가져와 미세먼지 배지와 건강 팁에 사용합니다.
+GET /data/2.5/air_pollution
+
+## OpenWeatherMap 5 Day / 3 Hour Forecast API
+3일 예보 카드와 시간별 온도 변화 ECharts 그래프에 사용합니다.
+GET /data/2.5/forecast
+
+## Browser Geolocation API
+사용자의 위치 권한을 받아 위도·경도를 획득하고, 내 위치 날씨를 추가합니다.
+navigator.geolocation.getCurrentPosition()
+프로젝트에서는 VueUse의 useGeolocation()으로 사용했습니다.
+
+### 모든 OpenWeatherMap 요청은 Axios로 호출하며, API 키는 VITE_OPENWEATHER_API_KEY 환경 변수에서 읽도록 구성했습니다.
+

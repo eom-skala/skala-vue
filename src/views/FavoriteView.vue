@@ -4,13 +4,14 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import WeatherCard from '../components/exercise/WeatherCard.vue'
 import { useFavoritesStore } from '../stores/favorites'
-import { weatherList } from '../data/WeatherList'
+import { useCitiesStore } from '../stores/cities'
 
 const router = useRouter()
 const favoritesStore = useFavoritesStore()
+const citiesStore = useCitiesStore()
 
 const favoriteCityList = computed(() =>
-    weatherList.filter((city) => favoritesStore.favoriteCities.includes(city.name)),
+    citiesStore.weatherList.filter((city) => favoritesStore.favoriteCities.includes(city.name)),
 )
 
 function showDetail(city) {

@@ -43,6 +43,9 @@ import SlotScopedChild from './components/practices/basic/SlotScopedChild.vue'
 import SlotScopedParent from './components/practices/basic/SlotScopedParent.vue'
 import WeatherParent from './components/exercise/WeatherParent.vue'
 import UnitToggler from './components/exercise/UnitToggler.vue'
+import { useConfigStore } from './stores/configStore'
+
+const configStore = useConfigStore()
 
 
 // import { RouterLink, RouterView } from 'vue-router'
@@ -64,8 +67,7 @@ import UnitToggler from './components/exercise/UnitToggler.vue'
   </header>
 
   <RouterView /> -->
-  <div style="padding: 20px">
-    <!-- <SampleOne />
+  <!-- <SampleOne />
     <hr>
     <SampleTwo />
     <hr>
@@ -128,25 +130,26 @@ import UnitToggler from './components/exercise/UnitToggler.vue'
     <WatchEffect />
     <hr>
     <LifeCycleHook /> -->
-    <!-- <PropsEmitsParent />
+  <!-- <PropsEmitsParent />
     <hr>
     <SlotDefaultParent />
     <hr>
     <SlotNamedParent />
     <hr>
     <SlotScopedParent /> -->
-    <!-- <Practice2 /> -->
-    <!-- <WeatherParent /> -->
+  <!-- <Practice2 /> -->
+  <!-- <WeatherParent /> -->
+  <div class="app-shell" :class="{ 'dark-mode': configStore.isDarkMode }">
     <header class="app-header">
       <div class="app-header__inner">
         <nav aria-label="주요 메뉴">
           <RouterLink to="/">날씨 대시보드</RouterLink>
           <RouterLink to="/favorites">즐겨찾기</RouterLink>
+          <RouterLink to="/cities">도시 관리</RouterLink>
           <RouterLink to="/settings">설정</RouterLink>
           <RouterLink to="/about">서비스 소개</RouterLink>
         </nav>
 
-        <!-- [본인 추가] Navigation Bar 옆에 단위 설정 토글 배치, SKALA 브랜딩과 함께 우측 그룹으로 정리 -->
         <div class="app-header__side">
           <UnitToggler />
           <span class="brand">SKALA</span>
@@ -192,7 +195,8 @@ input {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  max-width: 900px;
+  width: 100%;
+  max-width: none;
   margin: auto;
 }
 
@@ -224,6 +228,57 @@ input {
   font: 1000 18px 'Outfit', sans-serif;
   letter-spacing: 4px;
   color: #000;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: #eef2f7;
+  color: #1c2333;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.app-shell.dark-mode {
+  background: #151a24;
+  color: #f4f7fb;
+}
+
+.app-shell.dark-mode .app-header {
+  background: rgb(28 35 51 / 92%);
+  border-color: #3d4758;
+}
+
+.app-shell.dark-mode .app-header a {
+  color: #c9d3e0;
+}
+
+.app-shell.dark-mode .app-header a.router-link-active {
+  color: #72b8f1;
+}
+
+.dark-mode .page {
+  background: #151a24 !important;
+  color: #f4f7fb !important;
+}
+
+.dark-mode .manage-card,
+.dark-mode .city-list,
+.dark-mode .setting-card,
+.dark-mode .detail-item,
+.dark-mode .weather-card,
+.dark-mode .search-city,
+.dark-mode .feedback-panel,
+.dark-mode .empty-state {
+  background: #222a37 !important;
+  border-color: #3d4758 !important;
+}
+
+.dark-mode .hero-sub,
+.dark-mode .summary,
+.dark-mode .current-value,
+.dark-mode .detail-item .label,
+.dark-mode .place span,
+.dark-mode .tip-text {
+  color: #b9c4d3 !important;
 }
 </style>
 

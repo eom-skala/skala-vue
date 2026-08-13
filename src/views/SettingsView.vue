@@ -2,7 +2,7 @@
 
 import { RouterLink } from 'vue-router'
 import UnitToggler from '../components/exercise/UnitToggler.vue'
-import { useConfigStore } from '../stores/config'
+import { useConfigStore } from '../stores/configStore'
 
 const configStore = useConfigStore()
 </script>
@@ -22,7 +22,26 @@ const configStore = useConfigStore()
                 <UnitToggler />
             </div>
             <p class="current-value">
-                현재 단위 · <strong>{{ configStore.unit === 'fahrenheit' ? '화씨 (°F)' : '섭씨 (°C)' }}</strong>
+                현재 단위 · <strong>{{ configStore.unit === 'fahrenheit' ? '화씨' : '섭씨' }} ({{ configStore.unitSymbol
+                    }})</strong>
+            </p>
+        </div>
+        <div class="setting-card">
+            <div class="setting-row">
+                <div class="setting-text">
+                    <h2>다크 모드</h2>
+                    <p>화면을 어두운 색상 테마로 표시합니다.</p>
+                </div>
+
+                <button class="theme-toggle" :class="{ active: configStore.isDarkMode }" type="button" role="switch"
+                    :aria-checked="configStore.isDarkMode" @click="configStore.toggleDarkMode">
+                    <span></span>
+                </button>
+            </div>
+
+            <p class="current-value">
+                현재 테마 ·
+                <strong>{{ configStore.isDarkMode ? '다크 모드' : '라이트 모드' }}</strong>
             </p>
         </div>
 
@@ -110,5 +129,33 @@ const configStore = useConfigStore()
 
 .back-link:hover {
     text-decoration: underline;
+}
+
+.theme-toggle {
+    width: 48px;
+    height: 26px;
+    padding: 3px;
+    border: 0;
+    border-radius: 999px;
+    background: #c9d3e0;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.theme-toggle span {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s ease;
+}
+
+.theme-toggle.active {
+    background: #3e8ed8;
+}
+
+.theme-toggle.active span {
+    transform: translateX(22px);
 }
 </style>

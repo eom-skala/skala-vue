@@ -1,20 +1,18 @@
 <script setup>
-/* ============================================================
-   UnitToggler.vue
-   - Navigation Bar 옆(App.vue 헤더)에 배치되는 단위 설정 변경 UI
-   - configStore.unit('celsius' | 'fahrenheit')을 직접 읽고 바꾼다
-   ============================================================ */
-import { useConfigStore } from '../../stores/config'
+
+import { useConfigStore } from '../../stores/configStore'
 
 const configStore = useConfigStore()
 </script>
 
 <template>
     <div class="unit-toggler" role="group" aria-label="온도 단위 설정">
-        <button :class="{ active: configStore.unit === 'celsius' }" @click="configStore.setUnit('celsius')">
+        <button type="button" :class="{ active: configStore.unit === 'celsius' }"
+            @click="configStore.unit === 'fahrenheit' && configStore.toggleUnit()">
             °C
         </button>
-        <button :class="{ active: configStore.unit === 'fahrenheit' }" @click="configStore.setUnit('fahrenheit')">
+        <button type="button" :class="{ active: configStore.unit === 'fahrenheit' }"
+            @click="configStore.unit === 'celsius' && configStore.toggleUnit()">
             °F
         </button>
     </div>

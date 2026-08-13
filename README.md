@@ -185,91 +185,123 @@ npm run lint
 
 ---
 
-# Pinia
+# Pinia 및 추가 기능
 
-### 1. 전역 상태 관리(Pinia) 추가
+## 1. 전역 상태 관리
 
-`src/stores/`에 전역 상태를 관리하는 Store를 추가했습니다.
+`main.js`에서 `createPinia()`를 등록해 여러 View가 같은 상태를 공유합니다.
 
-- `favorites.js`
-    - `favoriteCities`: 즐겨찾기 도시 목록
-    - `toggleFavorite(cityName)`: 즐겨찾기 추가/삭제
-    - `isFavorite(cityName)`: 즐겨찾기 포함 여부 확인
-- `config.js`
-    - `unit`: 온도 단위 상태 (`celsius` / `fahrenheit`)
-    - `setUnit(unit)`: 섭씨 또는 화씨 선택
-    - `toggleUnit()`: 현재 단위를 반대 단위로 변경
+### `src/stores/favorites.js`
 
-메인 대시보드와 즐겨찾기 대시보드가 같은 `favoritesStore`를 사용하므로, 별표를 누른 도시가 즐겨찾기 화면에 즉시 반영됩니다.
+- `favoriteCities`: 즐겨찾기한 도시 이름 배열
+- `toggleFavorite(cityName)`: 도시를 즐겨찾기에 추가하거나 제거
+- `isFavorite(cityName)`: 해당 도시의 즐겨찾기 여부 반환
+- `removeFavorite(cityName)`: 도시 삭제 시 관련 즐겨찾기 항목도 제거
 
-### 2. 즐겨찾기 대시보드 추가
+메인 대시보드와 `/favorites`는 같은 Store를 사용합니다. 따라서 메인 카드의 별표 버튼을 누르면 즐겨찾기 대시보드에 즉시 반영됩니다.
 
-`FavoriteView.vue`와 `/favorites` 라우트를 추가했습니다.
+### `src/stores/configStore.js`
 
-- 메인 화면에서 별표를 누른 도시만 목록으로 표시
-- 즐겨찾기 카드에서 다시 별표를 누르면 목록에서 즉시 제거
-- 카드 클릭 또는 상세보기 클릭 시 해당 도시 상세 페이지로 이동
-- 목록이 비어 있으면 홈으로 돌아가는 안내 화면 표시
+온도 단위와 화면 테마처럼 앱 전체에 적용되는 설정을 관리합니다.
 
-### 3. 온도 단위 설정 기능 추가
+- state `unit`: 현재 온도 단위. 초기값은 `'celsius'`
+- getter `unitSymbol`: 단위에 따라 `℃` 또는 `℉` 반환
+- action `toggleUnit()`: `'celsius'`와 `'fahrenheit'`를 서로 전환
+- state `isDarkMode`: 다크 모드 활성 여부
+- action `toggleDarkMode()`: 라이트/다크 모드를 전환
 
-전역 내비게이션에 `UnitToggler.vue`를 추가했습니다.
+```js
+const unit = ref('celsius')
+const unitSymbol = computed(() =>
+  unit.value === 'celsius' ? '℃' : '℉',
+)
 
-- `°C` 버튼: 섭씨 표시
-- `°F` 버튼: 화씨 표시
-- 선택된 단위는 활성 스타일로 표시
-
-`WeatherCard.vue`는 전역 단위 상태를 구독하도록 변경되어, 메인·즐겨찾기 화면의 카드 온도가 함께 변환됩니다.
-
-### 4. 상세 페이지 온도 단위 연동
-
-`WeatherDetailView.vue`에도 전역 `configStore`를 연결했습니다.
-
-- 현재 온도 변환
-- 체감 온도 변환
-- 예: `28°C` → `82°F`, `30°C` → `86°F`
-
-따라서 어느 페이지에서든 내비게이션의 `°C / °F`를 바꾸면 상세 페이지에도 같은 단위가 적용됩니다.
-
-### 5. 설정 페이지 추가
-
-`SettingsView.vue`와 `/settings` 라우트를 추가했습니다.
-
-- 현재 선택된 온도 단위 확인
-- 섭씨/화씨를 설정 화면에서도 변경 가능
-- 내비게이션의 단위 토글과 같은 `configStore`를 공유
-
-### 6. 내비게이션 확장
-
-`App.vue`의 내비게이션에 아래 메뉴를 추가했습니다.
-
-- 날씨 대시보드 `/`
-- 즐겨찾기 `/favorites`
-- 설정 `/settings`
-- 서비스 소개 `/about`
-
-오른쪽에는 `UnitToggler`와 `SKALA` 브랜드를 배치했습니다.
-
-### 7. 날씨 데이터 분리
-
-`src/data/WeatherList.js`로 공통 도시 데이터를 분리했습니다.
-
-```
-export const weatherList = [
-  { id: 'city_01', name: '서울', temp: 28, status: '맑음' },
-  { id: 'city_02', name: '수원', temp: 24, status: '비' },
-  { id: 'city_03', name: '부산', temp: 26, status: '구름' },
-]
+function toggleUnit() {
+  unit.value = unit.value === 'celsius' ? 'fahrenheit' : 'celsius'
+}
 ```
 
-특히 즐겨찾기 화면은 이 공통 데이터를 기준으로, Store에 저장된 도시명만 필터링하여 표시합니다.
+### `src/stores/cities.js`
 
-### 8. 라우터 확장 및 예외 처리
+도시 목록을 전역으로 관리합니다.
 
-기존 라우트 외에 아래 경로가 추가되었습니다.
+- `weatherList`: 대시보드·즐겨찾기·상세 화면이 함께 사용하는 도시 배열
+- `addCity({ name, temp, status })`: 도시 추가 및 유효성 검사
+- `removeCity(cityId)`: 사용자가 추가한 도시 삭제
 
-- `/favorites` → `FavoriteView.vue`
-- `/settings` → `SettingsView.vue`
-- `/:pathMatch(.*)*` → `NotFoundView.vue`
+기본 도시(서울·수원·부산)는 `isDefault: true`로 설정되어 삭제할 수 없습니다. 도시 이름 중복과 기온 범위(`-50℃ ~ 60℃`)도 검사합니다.
 
-마지막 Catch-all Route는 존재하지 않는 URL 접속 시 404 페이지를 표시합니다.
+---
+
+## 2. 추가 View 및 라우트
+
+| 경로 | View | 기능 |
+| --- | --- | --- |
+| `/` | `WeatherHomeView.vue` | 날씨 검색, 정렬, 카드 선택, 즐겨찾기 |
+| `/weather/:cityId` | `WeatherDetailView.vue` | 도시별 상세 날씨 정보 |
+| `/favorites` | `FavoriteView.vue` | 즐겨찾기한 도시 목록 |
+| `/cities` | `CityManageView.vue` | 도시 추가 및 삭제 관리 |
+| `/settings` | `SettingsView.vue` | 온도 단위와 다크 모드 설정 |
+| `/about` | `WeatherAboutView.vue` | 서비스 소개 |
+| `/:pathMatch(.*)*` | `NotFoundView.vue` | 정의되지 않은 경로의 404 처리 |
+
+모든 View는 Vue Router의 동적 import를 사용해 Lazy Loading 됩니다.
+
+---
+
+## 3. 즐겨찾기 대시보드
+
+`FavoriteView.vue`는 `favoritesStore.favoriteCities`와 `citiesStore.weatherList`를 결합하여 즐겨찾기 도시만 표시합니다.
+
+- 메인 카드의 별표 버튼으로 도시 추가/삭제
+- 즐겨찾기 화면에서도 별표 버튼으로 즉시 제거
+- 카드 또는 상세보기 클릭 시 `/weather/:cityId`로 이동
+- 즐겨찾기 도시가 없으면 홈으로 이동하는 안내 표시
+
+---
+
+## 4. 도시 관리 기능
+
+`CityManageView.vue`에서 도시명, 현재 기온, 날씨 상태(맑음/비/구름)를 입력해 도시를 추가할 수 있습니다.
+
+- 추가된 도시는 홈·즐겨찾기·상세 페이지에 즉시 표시
+- 사용자가 추가한 도시만 삭제 가능
+- 도시를 삭제하면 즐겨찾기 목록에서도 함께 제거
+- 새 도시의 상세 페이지도 `/weather/:cityId` 경로로 접근 가능
+
+---
+
+## 5. 온도 단위 전환
+
+`UnitToggler.vue`는 내비게이션과 설정 화면에서 공통으로 사용합니다.
+
+- `°C` 버튼: 섭씨 상태 활성화
+- `°F` 버튼: 화씨 상태 활성화
+- Store의 `toggleUnit()`만 사용해 상태를 전환
+- 메인/즐겨찾기 카드, 평균 기온, 상세 페이지의 현재·체감 온도가 함께 변환
+
+예시: `28℃`는 화씨 모드에서 `82℉`로 표시됩니다.
+
+---
+
+## 6. 다크 모드
+
+`SettingsView.vue`의 다크 모드 스위치가 `configStore.isDarkMode`를 변경합니다.
+
+- 앱 최상위 `.app-shell`에 `dark-mode` 클래스를 적용
+- 내비게이션, 페이지 배경, 카드, 텍스트 색상을 어두운 테마로 전환
+- 라이트/다크 테마 변경은 모든 라우트 화면에 공통 적용
+
+```vue
+<div class="app-shell" :class="{ 'dark-mode': configStore.isDarkMode }">
+  <RouterView />
+</div>
+```
+
+---
+
+## 7. 레이아웃 개선
+
+- Vite 기본 템플릿의 데스크톱 2열 `#app` Grid를 제거해 대시보드가 화면 폭 전체를 사용하도록 수정
+- 내비게이션 메뉴는 왼쪽, 단위 토글과 `SKALA` 브랜딩은 오른쪽에 배치
+- 날씨 카드 영역과 피드백 패널의 고정 폭 제한을 해제해 넓은 화면에서 카드 그리드가 자연스럽게 확장

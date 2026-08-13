@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { useConfigStore } from '../../stores/config'
+import { useConfigStore } from '../../stores/configStore'
 
 const props = defineProps({ city: { type: Object, required: true }, selectedCity: { type: Object, default: null }, isFavorite: Boolean })
 const emit = defineEmits(['select-card', 'click-detail', 'toggle-favorite', 'show-temp-tip'])
@@ -17,7 +17,6 @@ const displayTemp = computed(() => {
   return rawTemp // 'celsius'일 때는 원본 그대로 반환
 })
 
-const unitSymbol = computed(() => (configStore.unit === 'fahrenheit' ? '°F' : '°C'))
 </script>
 
 <template>
@@ -29,7 +28,7 @@ const unitSymbol = computed(() => (configStore.unit === 'fahrenheit' ? '°F' : '
         </div>
       </div><button class="detail-btn" @click.stop="emit('click-detail', city)">상세보기</button>
     </div>
-    <div class="temp-readout"><span class="temp-number">{{ displayTemp }}</span><span class="temp-unit">{{ unitSymbol
+    <div class="temp-readout"><span class="temp-number">{{ displayTemp }}</span><span class="temp-unit">{{ configStore.unitSymbol
     }}</span></div>
     <button class="temp-status" :class="city.temp >= 25 ? 'hot' : 'cool'" @click.stop="emit('show-temp-tip', city)">{{
       city.temp >= 25 ? '🔥 더움 · 25도 이상' : '❄️ 선선함 · 25도 미만' }}</button>

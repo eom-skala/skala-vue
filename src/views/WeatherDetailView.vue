@@ -1,8 +1,9 @@
 <script setup>
 
-import { computed, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useConfigStore } from '../stores/config'
+import { useConfigStore } from '../stores/configStore'
+import { useCitiesStore } from '../stores/cities'
 
 const props = defineProps({
   cityId: { type: String, required: true },
@@ -10,6 +11,7 @@ const props = defineProps({
 
 const router = useRouter()
 const configStore = useConfigStore()
+const citiesStore = useCitiesStore()
 
 const mockDetailData = {
   city_01: {
@@ -31,14 +33,26 @@ const mockDetailData = {
 
 const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁️' }[status] ?? '🌤️')
 
-const cityDetail = ref(null)
-onMounted(() => {
-  cityDetail.value = mockDetailData[props.cityId] ?? null
+const cityDetail = computed(() => {
+  const city = citiesStore.weatherList.find((item) => item.id === props.cityId)
+  if (!city) return null
+
+  return {
+    feelsLike: city.temp,
+    humidity: 60,
+    windSpeed: 2.5,
+    precipitation: city.status === '비' ? 70 : 0,
+    uvIndex: city.status === '맑음' ? 7 : 3,
+    sunrise: '05:12',
+    sunset: '19:48',
+    updatedAt: '방금 전',
+    ...mockDetailData[city.id],
+    ...city,
+  }
 })
 
 const goHome = () => router.push('/')
 
-const unitSymbol = computed(() => (configStore.unit === 'fahrenheit' ? '°F' : '°C'))
 const displayTemp = (celsius) =>
   configStore.unit === 'fahrenheit' ? Math.round((celsius * 9) / 5 + 32) : celsius
 </script>
@@ -49,9 +63,9 @@ const displayTemp = (celsius) =>
       <p class="eyebrow">WEATHER DETAIL</p>
       <span class="icon">{{ statusIcon(cityDetail.status) }}</span>
       <h1>{{ cityDetail.name }}</h1>
-      <p class="temperature">{{ displayTemp(cityDetail.temp) }}{{ unitSymbol }}</p>
+      <p class="temperature">{{ displayTemp(cityDetail.temp) }}{{ configStore.unitSymbol }}</p>
       <p class="summary">
-        현재 날씨는 <strong>{{ cityDetail.status }}</strong>이며, 체감 온도는 {{ displayTemp(cityDetail.feelsLike) }}{{ unitSymbol }}입니다.
+        현재 날씨는 <strong>{{ cityDetail.status }}</strong>이며, 체감 온도는 {{ displayTemp(cityDetail.feelsLike) }}{{ configStore.unitSymbol }}입니다.
       </p>
 
       <div class="detail-grid">

@@ -13,5 +13,9 @@ export const useFavoritesStore = defineStore("favorites", () => {
     return favoriteCities.value.includes(cityName);
   }
 
-  return { favoriteCities, toggleFavorite, isFavorite };
+  function removeFavorite(cityName) {
+    favoriteCities.value = favoriteCities.value.filter((name) => name !== cityName);
+  }
+
+  return { favoriteCities, toggleFavorite, isFavorite, removeFavorite };
 });

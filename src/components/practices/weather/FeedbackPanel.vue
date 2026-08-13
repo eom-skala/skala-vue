@@ -18,7 +18,7 @@ defineProps({ selectedCityName: { type: String, default: '' }, tipCity: { type: 
 <style scoped>
 .feedback-panel {
   width: 100%;
-  max-width: 900px;
+  max-width: none;
   margin: 24px auto 0;
   overflow: hidden;
   border: 1px solid var(--line);

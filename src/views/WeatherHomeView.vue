@@ -6,15 +6,14 @@ import SearchBar from '../components/exercise/SearchBar.vue'
 import WeatherCard from '../components/exercise/WeatherCard.vue'
 import FeedbackPanel from '../components/practices/weather/FeedbackPanel.vue'
 import { useFavoritesStore } from '../stores/favorites'
+import { useCitiesStore } from '../stores/cities'
+import { useConfigStore } from '../stores/configStore'
 
 const router = useRouter()
 const favoritesStore = useFavoritesStore()
-
-const weatherList = ref([
-    { id: 'city_01', name: '서울', temp: 28, status: '맑음' },
-    { id: 'city_02', name: '수원', temp: 24, status: '비' },
-    { id: 'city_03', name: '부산', temp: 26, status: '구름' },
-])
+const citiesStore = useCitiesStore()
+const configStore = useConfigStore()
+const weatherList = computed(() => citiesStore.weatherList)
 const searchQuery = ref('')
 const selectedCityInfo = ref('')
 const sortOrder = ref('name')
@@ -47,6 +46,10 @@ const averageTemp = computed(() => {
     const total = filteredWeatherList.value.reduce((sum, city) => sum + city.temp, 0)
     return Math.round((total / filteredWeatherList.value.length) * 10) / 10
 })
+
+const displayAverageTemp = computed(() =>
+    configStore.unit === 'fahrenheit' ? Math.round((averageTemp.value * 9) / 5 + 32) : averageTemp.value,
+)
 
 function selectCity(city) {
     selectedCityInfo.value = city.name
@@ -105,7 +108,7 @@ watch(
                     </div>
                 </div>
                 <p v-if="sortedFilteredList.length" class="avg-readout">
-                    평균 기온 · <strong>{{ averageTemp }}°C</strong> · 즐겨찾기 {{ favoritesStore.favoriteCities.length }}곳
+                    평균 기온 · <strong>{{ displayAverageTemp }}{{ configStore.unitSymbol }}</strong> · 즐겨찾기 {{ favoritesStore.favoriteCities.length }}곳
                 </p>
 
                 <TransitionGroup v-if="sortedFilteredList.length" name="card" tag="div" class="weather-grid">

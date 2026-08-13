@@ -1,37 +1,17 @@
 <script setup>
 
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useConfigStore } from '../stores/configStore'
 import { useCitiesStore } from '../stores/cities'
 
-const props = defineProps({
-  cityId: { type: String, required: true },
-})
+const props = defineProps({ cityId: { type: String, required: true } })
 
 const router = useRouter()
 const configStore = useConfigStore()
 const citiesStore = useCitiesStore()
 
-const mockDetailData = {
-  city_01: {
-    name: '서울', temp: 28, status: '맑음', feelsLike: 30,
-    humidity: 55, windSpeed: 2.4, precipitation: 0, uvIndex: 7,
-    sunrise: '05:12', sunset: '19:48', updatedAt: '10분 전',
-  },
-  city_02: {
-    name: '수원', temp: 24, status: '비', feelsLike: 23,
-    humidity: 82, windSpeed: 4.1, precipitation: 70, uvIndex: 2,
-    sunrise: '05:13', sunset: '19:47', updatedAt: '10분 전',
-  },
-  city_03: {
-    name: '부산', temp: 26, status: '구름', feelsLike: 27,
-    humidity: 68, windSpeed: 3.2, precipitation: 20, uvIndex: 4,
-    sunrise: '05:07', sunset: '19:41', updatedAt: '10분 전',
-  },
-}
-
-const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁️' }[status] ?? '🌤️')
+const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁️', 눈: '❄️' }[status] ?? '🌤️')
 
 const cityDetail = computed(() => {
   const city = citiesStore.weatherList.find((item) => item.id === props.cityId)
@@ -42,19 +22,32 @@ const cityDetail = computed(() => {
     humidity: 60,
     windSpeed: 2.5,
     precipitation: city.status === '비' ? 70 : 0,
-    uvIndex: city.status === '맑음' ? 7 : 3,
-    sunrise: '05:12',
-    sunset: '19:48',
-    updatedAt: '방금 전',
-    ...mockDetailData[city.id],
+    sunrise: '-',
+    sunset: '-',
+    updatedAt: '데이터 없음',
+    description: city.status,
     ...city,
   }
 })
 
+const isRefreshing = ref(false)
+
+async function refresh() {
+  const city = citiesStore.weatherList.find((item) => item.id === props.cityId)
+  if (!city) return
+  isRefreshing.value = true
+  await citiesStore.refreshCity(city)
+  isRefreshing.value = false
+}
+
 const goHome = () => router.push('/')
+
+// 상세 화면에 바로 진입한 경우(홈을 거치지 않은 경우)를 대비해 최신 데이터를 한 번 더 불러옵니다.
+onMounted(refresh)
 
 const displayTemp = (celsius) =>
   configStore.unit === 'fahrenheit' ? Math.round((celsius * 9) / 5 + 32) : celsius
+
 </script>
 
 <template>
@@ -65,7 +58,8 @@ const displayTemp = (celsius) =>
       <h1>{{ cityDetail.name }}</h1>
       <p class="temperature">{{ displayTemp(cityDetail.temp) }}{{ configStore.unitSymbol }}</p>
       <p class="summary">
-        현재 날씨는 <strong>{{ cityDetail.status }}</strong>이며, 체감 온도는 {{ displayTemp(cityDetail.feelsLike) }}{{ configStore.unitSymbol }}입니다.
+        현재 날씨는 <strong>{{ cityDetail.description ?? cityDetail.status }}</strong>이며, 체감 온도는 {{
+          displayTemp(cityDetail.feelsLike) }}{{ configStore.unitSymbol }}입니다.
       </p>
 
       <div class="detail-grid">
@@ -78,12 +72,8 @@ const displayTemp = (celsius) =>
           <span class="value">{{ cityDetail.windSpeed }} m/s</span>
         </div>
         <div class="detail-item">
-          <span class="label">강수확률</span>
-          <span class="value">{{ cityDetail.precipitation }}%</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">자외선지수</span>
-          <span class="value">{{ cityDetail.uvIndex }}</span>
+          <span class="label">강수량(1h)</span>
+          <span class="value">{{ cityDetail.precipitation }} mm</span>
         </div>
         <div class="detail-item">
           <span class="label">일출</span>
@@ -95,7 +85,12 @@ const displayTemp = (celsius) =>
         </div>
       </div>
 
-      <p class="updated">최근 업데이트 · {{ cityDetail.updatedAt }}</p>
+      <p class="updated">
+        최근 업데이트 · {{ cityDetail.updatedAt }}
+        <button class="refresh-btn" type="button" :disabled="isRefreshing" @click="refresh">
+          {{ isRefreshing ? '새로고침 중…' : '⟳ 새로고침' }}
+        </button>
+      </p>
     </template>
 
     <template v-else>
@@ -188,6 +183,23 @@ const displayTemp = (celsius) =>
   margin-top: 20px;
   font-size: 12px;
   color: #8f97a8;
+}
+
+.refresh-btn {
+  margin-left: 8px;
+  padding: 3px 10px;
+  border: 1px solid #dce3ed;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #3e8ed8;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.refresh-btn:disabled {
+  color: #8f97a8;
+  cursor: not-allowed;
 }
 
 .back-btn {

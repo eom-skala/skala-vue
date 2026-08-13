@@ -108,14 +108,20 @@ watch(
                     </div>
                 </div>
                 <p v-if="sortedFilteredList.length" class="avg-readout">
-                    평균 기온 · <strong>{{ displayAverageTemp }}{{ configStore.unitSymbol }}</strong> · 즐겨찾기 {{ favoritesStore.favoriteCities.length }}곳
+                    평균 기온 · <strong>{{ displayAverageTemp }}{{ configStore.unitSymbol }}</strong> · 즐겨찾기 {{
+                        favoritesStore.favoriteCities.length }}곳
+                    <button class="refresh-btn" type="button" :disabled="citiesStore.isLoading"
+                        @click="citiesStore.fetchAllWeather()">
+                        {{ citiesStore.isLoading ? '실시간 날씨 불러오는 중…' : '⟳ 실시간 날씨 새로고침' }}
+                    </button>
                 </p>
+                <p v-if="citiesStore.error" class="api-error" role="alert">⚠️ {{ citiesStore.error }}</p>
 
                 <TransitionGroup v-if="sortedFilteredList.length" name="card" tag="div" class="weather-grid">
                     <WeatherCard v-for="city in sortedFilteredList" :key="city.id" :city="city"
                         :selected-city="selectedCity" :is-favorite="favoritesStore.isFavorite(city.name)"
-                        @select-card="selectCity" @click-detail="showDetail" @toggle-favorite="favoritesStore.toggleFavorite"
-                        @show-temp-tip="showTempTip" />
+                        @select-card="selectCity" @click-detail="showDetail"
+                        @toggle-favorite="favoritesStore.toggleFavorite" @show-temp-tip="showTempTip" />
                 </TransitionGroup>
                 <div v-else class="no-result">
                     <p class="no-result-icon">🔍</p>
@@ -210,6 +216,29 @@ watch(
 
 .avg-readout strong {
     color: var(--ink);
+}
+
+.refresh-btn {
+    margin-left: 10px;
+    padding: 4px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--accent-cool);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.refresh-btn:disabled {
+    color: var(--ink-soft);
+    cursor: not-allowed;
+}
+
+.api-error {
+    margin: -8px 0 16px;
+    color: #d24a32;
+    font-size: 13px;
 }
 
 .sort-toggle {

@@ -41,11 +41,22 @@ import SlotNamedChild from './components/practices/basic/SlotNamedChild.vue'
 import SlotNamedParent from './components/practices/basic/SlotNamedParent.vue'
 import SlotScopedChild from './components/practices/basic/SlotScopedChild.vue'
 import SlotScopedParent from './components/practices/basic/SlotScopedParent.vue'
+import AxiosJson from './components/practices/basic/AxiosJson.vue'
+import AxiosWeather from './components/practices/basic/AxiosWeather.vue'
+
 import WeatherParent from './components/exercise/WeatherParent.vue'
 import UnitToggler from './components/exercise/UnitToggler.vue'
 import { useConfigStore } from './stores/configStore'
+import { useCitiesStore } from './stores/cities'
+import { onMounted } from 'vue'
+import { Axios } from 'axios'
 
 const configStore = useConfigStore()
+const citiesStore = useCitiesStore()
+
+onMounted(() => {
+  citiesStore.fetchAllWeather()
+})
 
 
 // import { RouterLink, RouterView } from 'vue-router'
@@ -139,6 +150,8 @@ const configStore = useConfigStore()
     <SlotScopedParent /> -->
   <!-- <Practice2 /> -->
   <!-- <WeatherParent /> -->
+  <!-- <AxiosJson /> -->
+  <!-- <AxiosWeather /> -->
   <div class="app-shell" :class="{ 'dark-mode': configStore.isDarkMode }">
     <header class="app-header">
       <div class="app-header__inner">

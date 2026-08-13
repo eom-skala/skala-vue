@@ -364,8 +364,8 @@ function toggleUnit() {
 - 위치 권한 거부, 브라우저 미지원, API 호출 실패 시 안내 문구를 표시합니다.
 
 
-# 6. 추가된 UI Library
- 
+## 6. 추가된 UI Library
+
 VueUse (@vueuse/core)
 useGeolocation()으로 브라우저 위치 권한을 요청합니다.
 받아온 위도·경도를 기반으로 현재 위치의 도시 날씨를 즐겨찾기 목록에 추가합니다.

@@ -10,6 +10,7 @@ import { LineChart } from 'echarts/charts'
 import { CanvasRenderer } from 'echarts/renderers'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
+import WeatherLottie from '../components/exercise/WeatherLottie.vue'
 
 use([CanvasRenderer, LineChart, GridComponent, TooltipComponent])
 
@@ -18,8 +19,6 @@ const props = defineProps({ cityId: { type: String, required: true } })
 const router = useRouter()
 const configStore = useConfigStore()
 const citiesStore = useCitiesStore()
-
-const statusIcon = (status) => ({ 맑음: '☀️', 비: '🌧️', 구름: '☁️', 눈: '❄️' }[status] ?? '🌤️')
 
 const cityDetail = computed(() => {
   const city = citiesStore.weatherList.find((item) => item.id === props.cityId)
@@ -101,7 +100,7 @@ const displayTemp = (celsius) =>
   <section class="page">
     <template v-if="cityDetail">
       <p class="eyebrow">WEATHER DETAIL</p>
-      <span class="icon">{{ statusIcon(cityDetail.status) }}</span>
+      <WeatherLottie :status="cityDetail.status" :size="72" class="weather-detail-lottie" />
       <h1>{{ cityDetail.name }}</h1>
       <p class="temperature">{{ displayTemp(cityDetail.temp) }}{{ configStore.unitSymbol }}</p>
       <VChart v-if="forecast.length" class="forecast-chart" :option="chartOption" autoresize />

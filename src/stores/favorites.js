@@ -6,7 +6,11 @@ export const useFavoritesStore = defineStore("favorites", () => {
 
   function toggleFavorite(cityName) {
     const index = favoriteCities.value.indexOf(cityName);
-    index === -1 ? favoriteCities.value.push(cityName) : favoriteCities.value.splice(index, 1);
+    if (index === -1) {
+      favoriteCities.value.push(cityName);
+    } else {
+      favoriteCities.value.splice(index, 1);
+    }
   }
 
   function isFavorite(cityName) {

@@ -1,8 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 import { useGeolocation } from '@vueuse/core'
-import { Vue3Lottie } from 'vue3-lottie'
-import weatherSun from '../data/weather-sun.json'
 import { useRouter } from 'vue-router'
 import BaseDashboardCard from '../components/exercise/BaseDashboardCard.vue'
 import SearchBar from '../components/exercise/SearchBar.vue'
@@ -11,6 +9,7 @@ import FeedbackPanel from '../components/practices/weather/FeedbackPanel.vue'
 import { useFavoritesStore } from '../stores/favorites'
 import { useCitiesStore } from '../stores/cities'
 import { useConfigStore } from '../stores/configStore'
+import WeatherLottie from '../components/exercise/WeatherLottie.vue'
 
 const router = useRouter()
 const favoritesStore = useFavoritesStore()
@@ -137,7 +136,7 @@ onMounted(() => citiesStore.fetchAllWeather())
 <template>
     <main class="page" :class="pageThemeClass">
         <header class="hero">
-            <Vue3Lottie :animation-data="weatherSun" :height="56" :width="56" class="weather-lottie" />
+            <WeatherLottie :status="selectedCity?.status ?? '맑음'" :size="72" class="weather-lottie" />
             <p class="eyebrow">TODAY'S WEATHER</p>
             <h1>오늘의 날씨</h1>
             <p class="hero-sub">도시를 검색하거나 카드를 눌러 살펴보세요</p>

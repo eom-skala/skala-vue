@@ -13,16 +13,16 @@
     "format": "oxfmt src/"
   },
   "dependencies": {
-    "@vueuse/core": "^14.2.0",
+    "@vueuse/core": "^14.4.0",
     "axios": "^1.19.0",
-    "echarts": "^6.0.0",
+    "echarts": "^6.1.0",
     "element-plus": "^2.14.4",
     "marked": "^18.0.9",
     "pinia": "^3.0.4",
     "vue": "beta",
-    "vue-echarts": "^8.0.1",
-    "vue3-lottie": "^3.3.1",
-    "vue-router": "^5.0.4"
+    "vue-echarts": "^8.1.0",
+    "vue-router": "^5.0.4",
+    "vue3-lottie": "^3.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -366,17 +366,56 @@ function toggleUnit() {
 
 ## 6. 추가된 UI Library
 
-VueUse (@vueuse/core)
+### VueUse (@vueuse/core)
 useGeolocation()으로 브라우저 위치 권한을 요청합니다.
 받아온 위도·경도를 기반으로 현재 위치의 도시 날씨를 즐겨찾기 목록에 추가합니다.
 위치 정보를 불러오는 동안 버튼 상태와 오류 메시지를 관리합니다.
 
-Lottie Vue (vue3-lottie)
+### Lottie Vue (vue3-lottie)
 홈 화면 상단에 날씨 애니메이션을 표시합니다.
 정적인 아이콘보다 대시보드 첫 화면에 동적인 날씨 분위기를 제공합니다.
 Lottie JSON 파일을 src/assets/weather-sun.json에서 불러와 사용합니다.
 
-ECharts (echarts, vue-echarts)
+### ECharts (echarts, vue-echarts)
 도시 상세 화면에 3시간 단위 온도 변화 꺾은선 그래프를 표시합니다.
 OpenWeatherMap 5일/3시간 예보 데이터를 바탕으로 이후 약 48시간의 기온 흐름을 보여줍니다.
 마우스로 그래프 위 항목을 가리키면 시간과 예상 온도를 확인할 수 있습니다
+
+--- 
+
+# Source Code 품질관리
+
+## 1. ESLint 점검 및 오류 정리
+    - `npx eslint . --no-cache`로 전체 코드를 점검했습니다.
+    - 제출 화면과 관계없는 실습용 컴포넌트 import가 `App.vue`에 남아 있어 다수의 미사용 변수 오류가 발생하는 것을 확인했습니다.
+    - 제출 범위에서 제외되는 `src/components/practices/**`는 ESLint 검사 대상에서 제외하도록 설정하는 방안을 적용했습니다.
+    - `favorites.js`, `WeatherParent.vue`의 값만 평가하는 삼항 연산식을 `if...else`로 바꿔 Oxlint 오류를 제거하도록 정리했습니다.
+    - `WeatherDetailView.vue`의 미사용 `statusIcon` 함수도 삭제 대상으로 확인했습니다.
+    - 최종 점검 명령은 다음과 같습니다.
+
+```
+npx eslint . --no-cache
+npx oxlint .
+```
+
+## 2. API 키 환경 변수 전환 및 Git 제외
+    - `src/data/weather.js`에 하드코딩되어 있던 OpenWeatherMap API 키를 제거했습니다.
+    - API 키를 Vite 환경 변수로 읽도록 변경했습니다.
+
+```
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
+```
+
+- 프로젝트 최상위에 `.env.local` 파일을 생성해 실제 키를 저장합니다.
+
+```
+VITE_OPENWEATHER_API_KEY=발급받은_API_키
+```
+
+- `.gitignore`에 `.env`, `.env.*` 규칙을 추가해 API 키 파일이 Git에 올라가지 않도록 처리했습니다.
+- 공유 가능한 설정 형식은 `.env.example`에 키 없이 작성합니다.
+
+```
+VITE_OPENWEATHER_API_KEY=
+```
+

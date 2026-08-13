@@ -28,8 +28,11 @@ const displayTemp = computed(() => {
         </div>
       </div><button class="detail-btn" @click.stop="emit('click-detail', city)">상세보기</button>
     </div>
-    <div class="temp-readout"><span class="temp-number">{{ displayTemp }}</span><span class="temp-unit">{{ configStore.unitSymbol
-    }}</span></div>
+    <div class="temp-readout"><span class="temp-number">{{ displayTemp }}</span><span class="temp-unit">{{
+      configStore.unitSymbol
+        }}</span></div>
+    <span v-if="city.airQuality" class="air-badge" :class="`air-${city.airQuality.aqi}`">미세먼지 {{ city.airQuality.label
+    }}</span>
     <button class="temp-status" :class="city.temp >= 25 ? 'hot' : 'cool'" @click.stop="emit('show-temp-tip', city)">{{
       city.temp >= 25 ? '🔥 더움 · 25도 이상' : '❄️ 선선함 · 25도 미만' }}</button>
     <button class="fav-btn" :class="{ active: isFavorite }" @click.stop="emit('toggle-favorite', city.name)">{{
@@ -143,6 +146,32 @@ const displayTemp = computed(() => {
   padding: 6px 12px;
   font-size: 12px;
   font-weight: 700;
+}
+
+.air-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.air-1 {
+  background: #e5f7e8;
+  color: #27813a;
+}
+
+.air-2,
+.air-3 {
+  background: #fff5da;
+  color: #b87800;
+}
+
+.air-4,
+.air-5 {
+  background: #ffebe7;
+  color: #cf4932;
 }
 
 .fav-btn:hover {

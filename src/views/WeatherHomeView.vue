@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch, watchEffect } from 'vue'
+import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseDashboardCard from '../components/exercise/BaseDashboardCard.vue'
 import SearchBar from '../components/exercise/SearchBar.vue'
@@ -19,6 +19,8 @@ const selectedCityInfo = ref('')
 const sortOrder = ref('name')
 const tempTipCity = ref('')
 const tempTip = ref('')
+const isLocating = ref(false)
+const locationError = ref('')
 
 const selectedCity = computed(() =>
     weatherList.value.find((city) => city.name === selectedCityInfo.value) ?? null,
@@ -72,6 +74,33 @@ function showTempTip(city) {
     tempTip.value = message
 }
 
+function addCurrentLocation() {
+    locationError.value = ''
+    if (!navigator.geolocation) {
+        locationError.value = '이 브라우저는 위치 정보를 지원하지 않습니다.'
+        return
+    }
+
+    isLocating.value = true
+    navigator.geolocation.getCurrentPosition(
+        async ({ coords }) => {
+            try {
+                const result = await citiesStore.addCurrentLocation(coords)
+                if (result.ok) selectCity(result.city)
+            } catch {
+                locationError.value = '내 위치 날씨를 가져오지 못했습니다.'
+            } finally {
+                isLocating.value = false
+            }
+        },
+        () => {
+            locationError.value = '위치 정보 권한을 허용해 주세요.'
+            isLocating.value = false
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+    )
+}
+
 watch(selectedCityInfo, (current, previous) =>
     console.log(`[watch] selectedCityInfo 변경: ${previous} → ${current}`),
 )
@@ -84,6 +113,8 @@ watch(
     (cities) => console.log(`[watch] 즐겨찾기 목록 변경 (총 ${cities.length}개):`, cities),
     { deep: true },
 )
+
+onMounted(() => citiesStore.fetchAllWeather())
 </script>
 
 <template>
@@ -92,6 +123,10 @@ watch(
             <p class="eyebrow">TODAY'S WEATHER</p>
             <h1>오늘의 날씨</h1>
             <p class="hero-sub">도시를 검색하거나 카드를 눌러 살펴보세요</p>
+            <button class="location-btn" type="button" :disabled="isLocating" @click="addCurrentLocation">
+                {{ isLocating ? '위치 확인 중…' : '⌖ 내 위치 날씨 추가' }}
+            </button>
+            <p v-if="locationError" class="location-error" role="alert">{{ locationError }}</p>
         </header>
 
         <BaseDashboardCard>
@@ -193,6 +228,28 @@ watch(
 
 .hero-sub {
     margin: 0;
+}
+
+.location-btn {
+    margin-top: 16px;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--accent-cool);
+    font: 700 13px inherit;
+    cursor: pointer;
+}
+
+.location-btn:disabled {
+    color: var(--ink-soft);
+    cursor: not-allowed;
+}
+
+.location-error {
+    margin: 8px 0 0;
+    color: #d24a32;
+    font-size: 13px;
 }
 
 .list-header {

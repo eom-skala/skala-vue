@@ -339,3 +339,26 @@ function toggleUnit() {
 
 - `src/api/weather.js` 신설: 지오코딩(`geocodeCity`) + 현재 날씨 조회(`fetchCurrentWeather`) + 통합 헬퍼(`fetchWeatherByCityName`), 영문 날씨 코드 → 한글 상태값(맑음/비/구름/눈/흐림) 매핑 로직 포함
 - `stores/cities.js`에 `isLoading`, `error` 상태와 `refreshCity`, `fetchAllWeather`, `pickRandomCityNames`, `addCityByName` 액션 추가 (기존 수동 `addCity`는 제거)
+
+## 5. 추가된 API 기능
+
+**1. 미세먼지·대기질**
+
+- OpenWeatherMap Air Pollution API를 사용합니다.
+- 도시 카드에 `미세먼지 좋음 / 보통 / 나쁨` 배지를 표시합니다.
+- 상세 화면에는 PM2.5, PM10 수치도 함께 표시합니다.
+- 현재 날씨 갱신 시 대기질도 같이 갱신됩니다.
+
+**2. 5일치 일기예보**
+
+- OpenWeatherMap 5 Day / 3 Hour Forecast API를 사용합니다.
+- 상세 페이지에서 예보 데이터를 받아옵니다.
+- 오늘·내일·모레의 대표 시간대 예보를 카드로 표시합니다.
+- 현재 선택된 `℃ / ℉` 단위 설정에 맞춰 예보 기온도 변환됩니다.
+
+**3. 내 위치 날씨 추가**
+
+- 홈 화면의 `⌖ 내 위치 날씨 추가` 버튼으로 실행합니다.
+- 브라우저 Geolocation API로 현재 위도·경도를 가져옵니다.
+- 현재 날씨, 대기질, 도시명을 조회하여 대시보드 목록에 새 도시로 추가합니다.
+- 위치 권한 거부, 브라우저 미지원, API 호출 실패 시 안내 문구를 표시합니다.

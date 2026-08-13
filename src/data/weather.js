@@ -4,6 +4,9 @@ const API_KEY = "bb2a06df5df5f328666f57effe3c119a";
 
 const GEO_URL = "https://api.openweathermap.org/geo/1.0/direct";
 const WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather";
+const REVERSE_GEO_URL = "https://api.openweathermap.org/geo/1.0/reverse";
+const AIR_POLLUTION_URL = "https://api.openweathermap.org/data/2.5/air_pollution";
+const FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast";
 
 const WEATHER_MAIN_TO_STATUS = {
   Clear: "맑음",
@@ -65,5 +68,47 @@ export async function fetchCurrentWeather({ lat, lon }) {
  */
 export async function fetchWeatherByCityName(cityName) {
   const coords = await geocodeCity(cityName);
-  return fetchCurrentWeather(coords);
+  const weather = await fetchCurrentWeather(coords);
+  return { ...weather, ...coords };
+}
+
+export async function reverseGeocodeCity({ lat, lon }) {
+  const { data } = await axios.get(REVERSE_GEO_URL, {
+    params: { lat, lon, limit: 1, appid: API_KEY },
+  });
+
+  return data[0]?.local_names?.ko ?? data[0]?.name ?? "내 위치";
+}
+
+export async function fetchAirPollution({ lat, lon }) {
+  const { data } = await axios.get(AIR_POLLUTION_URL, {
+    params: { lat, lon, appid: API_KEY },
+  });
+  const air = data.list?.[0];
+  const labels = { 1: "좋음", 2: "보통", 3: "보통", 4: "나쁨", 5: "매우 나쁨" };
+
+  return {
+    aqi: air?.main?.aqi ?? null,
+    label: labels[air?.main?.aqi] ?? "정보 없음",
+    pm25: Math.round(air?.components?.pm2_5 ?? 0),
+    pm10: Math.round(air?.components?.pm10 ?? 0),
+  };
+}
+
+export async function fetchFiveDayForecast({ lat, lon }) {
+  const { data } = await axios.get(FORECAST_URL, {
+    params: { lat, lon, appid: API_KEY, units: "metric", lang: "kr" },
+  });
+
+  return data.list.map((item) => ({
+    timestamp: item.dt,
+    date: item.dt_txt.slice(0, 10),
+    time: item.dt_txt.slice(11, 16),
+    temp: Math.round(item.main.temp),
+    tempMin: Math.round(item.main.temp_min),
+    tempMax: Math.round(item.main.temp_max),
+    description: item.weather[0]?.description ?? "",
+    status: mapStatus(item.weather[0]?.main),
+    icon: item.weather[0]?.icon ?? "",
+  }));
 }

@@ -1,6 +1,11 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import { fetchWeatherByCityName } from "../data/weather";
+import {
+  fetchAirPollution,
+  fetchCurrentWeather,
+  fetchWeatherByCityName,
+  reverseGeocodeCity,
+} from "../data/weather";
 import { cityCatalog } from "../data/cityCatalog";
 
 const defaultCities = [
@@ -25,6 +30,7 @@ export const useCitiesStore = defineStore("cities", () => {
   async function refreshCity(city) {
     try {
       const weather = await fetchWeatherByCityName(city.name);
+      const airQuality = await fetchAirPollution(weather);
       Object.assign(city, {
         temp: weather.temp,
         status: weather.status,
@@ -37,6 +43,9 @@ export const useCitiesStore = defineStore("cities", () => {
         sunrise: formatClock(weather.sunrise),
         sunset: formatClock(weather.sunset),
         updatedAt: formatClock(Math.floor(Date.now() / 1000)),
+        lat: weather.lat,
+        lon: weather.lon,
+        airQuality,
       });
       return { ok: true };
     } catch (err) {
@@ -88,6 +97,40 @@ export const useCitiesStore = defineStore("cities", () => {
     return result;
   }
 
+  async function addCurrentLocation({ lat, lon }) {
+    const name = await reverseGeocodeCity({ lat, lon });
+    const existingCity = weatherList.value.find((city) => city.name === name);
+
+    if (existingCity) {
+      await refreshCity(existingCity);
+      return { ok: true, city: existingCity, alreadyExists: true };
+    }
+
+    const weather = await fetchCurrentWeather({ lat, lon });
+    const airQuality = await fetchAirPollution({ lat, lon });
+    const city = {
+      id: `city_${Date.now()}`,
+      name,
+      temp: weather.temp,
+      status: weather.status,
+      description: weather.description,
+      feelsLike: weather.feelsLike,
+      humidity: weather.humidity,
+      windSpeed: weather.windSpeed,
+      precipitation: weather.precipitation,
+      icon: weather.icon,
+      sunrise: formatClock(weather.sunrise),
+      sunset: formatClock(weather.sunset),
+      updatedAt: formatClock(Math.floor(Date.now() / 1000)),
+      lat,
+      lon,
+      airQuality,
+      isDefault: false,
+    };
+    weatherList.value.push(city);
+    return { ok: true, city, alreadyExists: false };
+  }
+
   function removeCity(cityId) {
     const city = weatherList.value.find((item) => item.id === cityId);
     if (!city || city.isDefault) return null;
@@ -104,6 +147,7 @@ export const useCitiesStore = defineStore("cities", () => {
     refreshCity,
     pickRandomCityNames,
     addCityByName,
+    addCurrentLocation,
     removeCity,
   };
 });

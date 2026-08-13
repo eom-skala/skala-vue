@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useConfigStore } from '../stores/configStore'
 import { useCitiesStore } from '../stores/cities'
+import { fetchFiveDayForecast } from '../data/weather'
 
 const props = defineProps({ cityId: { type: String, required: true } })
 
@@ -31,12 +32,43 @@ const cityDetail = computed(() => {
 })
 
 const isRefreshing = ref(false)
+const isForecastLoading = ref(false)
+const forecastError = ref('')
+const forecast = ref([])
+
+const dailyForecast = computed(() => {
+  const days = new Map()
+  forecast.value.forEach((item) => {
+    const distanceFromNoon = Math.abs(Number(item.time.slice(0, 2)) - 12)
+    const current = days.get(item.date)
+    if (!current || distanceFromNoon < current.distanceFromNoon) {
+      days.set(item.date, { ...item, distanceFromNoon })
+    }
+  })
+  return [...days.values()].slice(0, 3)
+})
+
+const forecastDayLabel = (index) => ['오늘', '내일', '모레'][index] ?? ''
+
+async function loadForecast(city) {
+  if (!city?.lat || !city?.lon) return
+  isForecastLoading.value = true
+  forecastError.value = ''
+  try {
+    forecast.value = await fetchFiveDayForecast(city)
+  } catch {
+    forecastError.value = '예보 정보를 가져오지 못했습니다.'
+  } finally {
+    isForecastLoading.value = false
+  }
+}
 
 async function refresh() {
   const city = citiesStore.weatherList.find((item) => item.id === props.cityId)
   if (!city) return
   isRefreshing.value = true
   await citiesStore.refreshCity(city)
+  await loadForecast(city)
   isRefreshing.value = false
 }
 
@@ -61,6 +93,10 @@ const displayTemp = (celsius) =>
         현재 날씨는 <strong>{{ cityDetail.description ?? cityDetail.status }}</strong>이며, 체감 온도는 {{
           displayTemp(cityDetail.feelsLike) }}{{ configStore.unitSymbol }}입니다.
       </p>
+      <p v-if="cityDetail.airQuality" class="air-badge" :class="`air-${cityDetail.airQuality.aqi}`">
+        미세먼지 {{ cityDetail.airQuality.label }} · PM2.5 {{ cityDetail.airQuality.pm25 }}㎍/㎥ · PM10 {{
+          cityDetail.airQuality.pm10 }}㎍/㎥
+      </p>
 
       <div class="detail-grid">
         <div class="detail-item">
@@ -84,6 +120,21 @@ const displayTemp = (celsius) =>
           <span class="value">{{ cityDetail.sunset }}</span>
         </div>
       </div>
+
+      <section class="forecast-section">
+        <div class="forecast-heading">
+          <h2>3일 예보</h2><span v-if="isForecastLoading">불러오는 중…</span>
+        </div>
+        <div v-if="dailyForecast.length" class="forecast-grid">
+          <article v-for="(item, index) in dailyForecast" :key="item.timestamp" class="forecast-card">
+            <strong>{{ forecastDayLabel(index) }}</strong>
+            <span>{{ item.date.slice(5).replace('-', '.') }} · {{ item.time }}</span>
+            <b>{{ displayTemp(item.temp) }}{{ configStore.unitSymbol }}</b>
+            <small>{{ item.description }}</small>
+          </article>
+        </div>
+        <p v-else-if="forecastError" class="forecast-error">{{ forecastError }}</p>
+      </section>
 
       <p class="updated">
         최근 업데이트 · {{ cityDetail.updatedAt }}
@@ -150,6 +201,32 @@ const displayTemp = (celsius) =>
   color: #1c2333;
 }
 
+.air-badge {
+  display: inline-block;
+  margin: -14px 0 24px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.air-1 {
+  background: #e5f7e8;
+  color: #27813a;
+}
+
+.air-2,
+.air-3 {
+  background: #fff5da;
+  color: #b87800;
+}
+
+.air-4,
+.air-5 {
+  background: #ffebe7;
+  color: #cf4932;
+}
+
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -177,6 +254,61 @@ const displayTemp = (celsius) =>
   font-size: 18px;
   font-weight: 700;
   font-family: 'Outfit', sans-serif;
+}
+
+.forecast-section {
+  max-width: 560px;
+  margin: 28px auto 0;
+  text-align: left;
+}
+
+.forecast-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.forecast-heading h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.forecast-heading span,
+.forecast-error {
+  color: #5b6478;
+  font-size: 12px;
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.forecast-card {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid #dce3ed;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.forecast-card span,
+.forecast-card small {
+  color: #5b6478;
+  font-size: 12px;
+}
+
+.forecast-card b {
+  font: 700 22px 'Outfit', sans-serif;
+}
+
+@media (max-width: 480px) {
+  .forecast-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .updated {

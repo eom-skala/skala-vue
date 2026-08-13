@@ -43,6 +43,7 @@ import SlotScopedChild from './components/practices/basic/SlotScopedChild.vue'
 import SlotScopedParent from './components/practices/basic/SlotScopedParent.vue'
 import AxiosJson from './components/practices/basic/AxiosJson.vue'
 import AxiosWeather from './components/practices/basic/AxiosWeather.vue'
+import ElementPlus from './components/practices/basic/ElementPlus.vue'
 
 import WeatherParent from './components/exercise/WeatherParent.vue'
 import UnitToggler from './components/exercise/UnitToggler.vue'
@@ -152,6 +153,7 @@ onMounted(() => {
   <!-- <WeatherParent /> -->
   <!-- <AxiosJson /> -->
   <!-- <AxiosWeather /> -->
+  <!-- <ElementPlus /> -->
   <div class="app-shell" :class="{ 'dark-mode': configStore.isDarkMode }">
     <header class="app-header">
       <div class="app-header__inner">

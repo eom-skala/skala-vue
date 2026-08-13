@@ -231,7 +231,7 @@ function toggleUnit() {
 
 기본 도시(서울·수원·부산)는 `isDefault: true`로 설정되어 삭제할 수 없습니다. 도시 이름 중복과 기온 범위(`-50℃ ~ 60℃`)도 검사합니다.
 
----
+
 
 ## 2. 추가 View 및 라우트
 
@@ -247,7 +247,7 @@ function toggleUnit() {
 
 모든 View는 Vue Router의 동적 import를 사용해 Lazy Loading 됩니다.
 
----
+
 
 ## 3. 즐겨찾기 대시보드
 
@@ -258,7 +258,7 @@ function toggleUnit() {
 - 카드 또는 상세보기 클릭 시 `/weather/:cityId`로 이동
 - 즐겨찾기 도시가 없으면 홈으로 이동하는 안내 표시
 
----
+
 
 ## 4. 도시 관리 기능
 
@@ -269,7 +269,7 @@ function toggleUnit() {
 - 도시를 삭제하면 즐겨찾기 목록에서도 함께 제거
 - 새 도시의 상세 페이지도 `/weather/:cityId` 경로로 접근 가능
 
----
+
 
 ## 5. 온도 단위 전환
 
@@ -282,7 +282,7 @@ function toggleUnit() {
 
 예시: `28℃`는 화씨 모드에서 `82℉`로 표시됩니다.
 
----
+
 
 ## 6. 다크 모드
 
@@ -298,7 +298,7 @@ function toggleUnit() {
 </div>
 ```
 
----
+
 
 ## 7. 레이아웃 개선
 
@@ -310,21 +310,21 @@ function toggleUnit() {
 
 # OpenWeather API
 
-**1. 실시간 날씨 데이터 연동**
+## 1. 실시간 날씨 데이터 연동
 
 - 도시별 목업(가짜) 기온/날씨 상태를 OpenWeatherMap 실데이터로 교체
 - 앱 최초 로드 시(`App.vue` 마운트) 등록된 모든 도시의 날씨를 자동으로 불러옴
 - 홈 화면에 "⟳ 실시간 날씨 새로고침" 버튼 추가 → 수동으로 전체 목록 재조회 가능
 - API 조회 실패 시 화면에 에러 메시지 표시(`⚠️ ...`)
 
-**2. 상세 페이지 실데이터화**
+## 2. 상세 페이지 실데이터화
 
 - `WeatherDetailView`의 가짜 `mockDetailData` 제거
 - 체감온도, 습도, 풍속, 강수량(1시간), 일출/일몰, 날씨 설명을 실제 API 값으로 표시
 - 상세 페이지 자체 진입 시(홈을 거치지 않아도) 자동으로 최신 데이터 재조회
 - 상세 페이지에 "⟳ 새로고침" 버튼 추가
 
-**3. 도시 추가 방식 변경 (직접입력 → 랜덤 추천 선택)**
+## 3. 도시 추가 방식 변경 (직접입력 → 랜덤 추천 선택)
 
 - 도시 이름/기온/상태를 수동 입력하던 폼 제거
 - 로컬 도시 후보 목록(`cityCatalog.js`, 한국 주요 도시 40개) 중 등록되지 않은 도시로 랜덤 10개를 추천
@@ -332,7 +332,7 @@ function toggleUnit() {
 - 추천 도시 버튼 클릭 시 실제 지오코딩+날씨 조회 API를 호출해 실데이터와 함께 자동 추가
 - 조회 중 로딩 상태(`OO 조회 중…`) 표시, 실패 시 목록에서 롤백하고 에러 메시지 표시
 
-**4. 내부 구조 정리**
+## 4. 내부 구조 정리
 
 - `src/api/weather.js` 신설: 지오코딩(`geocodeCity`) + 현재 날씨 조회(`fetchCurrentWeather`) + 통합 헬퍼(`fetchWeatherByCityName`), 영문 날씨 코드 → 한글 상태값(맑음/비/구름/눈/흐림) 매핑 로직 포함
 - `stores/cities.js`에 `isLoading`, `error` 상태와 `refreshCity`, `fetchAllWeather`, `pickRandomCityNames`, `addCityByName` 액션 추가 (기존 수동 `addCity`는 제거)
